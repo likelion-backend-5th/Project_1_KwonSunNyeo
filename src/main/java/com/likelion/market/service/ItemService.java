@@ -73,6 +73,11 @@ public class ItemService {
         Optional<ItemEntity> optionalItem = repository.findById(id);
         if (optionalItem.isPresent()) {
             ItemEntity item = optionalItem.get();
+            if (!item.getPassword().equals(dto.getPassword())) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."
+                );
+            }
             item.setTitle(dto.getTitle());
             item.setDescription(dto.getDescription());
             item.setWriter(dto.getWriter());
@@ -136,6 +141,11 @@ public class ItemService {
             if (!item.getPassword().equals(dto.getPassword())) {
                 throw new ResponseStatusException(
                         HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."
+                );
+            }
+            if (!item.getWriter().equals(dto.getWriter())) {
+                throw new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "작성자가 일치하지 않습니다."
                 );
             }
             repository.deleteById(id);
