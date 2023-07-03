@@ -12,8 +12,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 
 @Slf4j
@@ -79,6 +83,49 @@ public class ItemService {
             return ItemDto.fromEntity(item);
         }
         else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+
+    // 물품 정보 - 수정 - 이미지
+    public ItemDto updateItemImage(Long id, MultipartFile itemImage) {
+        Optional<ItemEntity> optionalItem = repository.findById(id);
+        if (optionalItem.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+
+        // 폴더만 생성
+        String imageDir = String.format("image/%d/", id);
+        log.info(imageDir);
+        try {
+            Files.createDirectories(Path.of(imageDir));
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        // 확장자를 포함한 이미지 이름 생성
+        String originalFilename = itemImage.getOriginalFilename();
+        String[] fileNameSplit = originalFilename.split("\\.");
+        String extension = fileNameSplit[fileNameSplit.length - 1];
+        String imageFilename = "image." + extension;
+        log.info(imageFilename);
+
+        // 폴더와 파일 경로를 포함한 이름 생성
+        String imagePath = imageDir + imageFilename;
+        log.info(imagePath);
+
+        // MultipartFile 저장
+        try {
+            itemImage.transferTo(Path.of(imagePath));
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        log.info(String.format("/static/%d/%s", id, imageFilename));
+
+        ItemEntity userEntity = optionalItem.get();
+        userEntity.setImageUrl(String.format("/static/%d/%s", id, imageFilename));
+        repository.save(userEntity);
+        return ItemDto.fromEntity(repository.save(userEntity));
     }
 
     // 물품 정보 - 삭제

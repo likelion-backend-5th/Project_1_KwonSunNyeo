@@ -8,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -64,6 +66,22 @@ public class ItemController {
         service.updateItem(id, dto);
         MessageResponseDto response = new MessageResponseDto();
         response.setMessage("물품이 수정되었습니다.");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    // 물품 정보 - 수정 - 이미지
+    // PUT /items/{itemId}/image
+    @PutMapping(
+            value = "/{id}/image",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<MessageResponseDto> image(
+            @PathVariable("id") Long id,
+            @RequestParam("image") MultipartFile itemImage
+    ) {
+        service.updateItemImage(id, itemImage);
+        MessageResponseDto response = new MessageResponseDto();
+        response.setMessage("이미지가 등록되었습니다.");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
