@@ -55,6 +55,17 @@ public class CommentController {
         return service.updateComment(itemId, commentId, dto);
     }
 
+    // 물품 댓글 - 답글
+    // PUT /items/{itemId}/comments/{commentId}/reply
+    @PutMapping("/{commentId}/reply")
+    public CommentDto updateReply(
+            @PathVariable("itemId") Long itemId,
+            @PathVariable("commentId") Long commentId,
+            @RequestBody CommentDto dto
+    ) {
+        return service.updateReply(itemId, commentId, dto);
+    }
+
     // 물품 댓글 - 삭제
     // DELETE /items/{itemId}/comments/{commentId}
     @DeleteMapping("/{commentId}")

@@ -1,5 +1,6 @@
 package com.likelion.market.service;
 
+import com.likelion.market.entity.ItemEntity;
 import com.likelion.market.repository.CommentRepository;
 import com.likelion.market.repository.ItemRepository;
 import com.likelion.market.dto.CommentDto;
@@ -67,6 +68,23 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         comment.setContent(dto.getContent());
         comment.setWriter(dto.getWriter());
+        commentRepository.save(comment);
+        return CommentDto.fromEntity(comment);
+    }
+
+    // 물품 댓글 - 답변
+    public CommentDto updateReply(Long itemId, Long commentId, CommentDto dto) {
+        Optional<ItemEntity> optionalItem = itemRepository.findById(itemId);
+        if (optionalItem.isEmpty())
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        Optional<CommentEntity> optionalComment = commentRepository.findById(commentId);
+        if (optionalComment.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        CommentEntity comment = optionalComment.get();
+        if (!itemId.equals(comment.getItemId()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        comment.setReply(dto.getReply());
         commentRepository.save(comment);
         return CommentDto.fromEntity(comment);
     }
