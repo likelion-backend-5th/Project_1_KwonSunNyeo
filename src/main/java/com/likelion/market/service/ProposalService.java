@@ -65,6 +65,16 @@ public class ProposalService {
         ProposalEntity proposal = optionalProposal.get();
         if (!itemId.equals(proposal.getItemId()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (!proposal.getPassword().equals(dto.getPassword())) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."
+            );
+        }
+        if (!proposal.getWriter().equals(dto.getWriter())) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "작성자가 일치하지 않습니다."
+            );
+        }
         proposal.setSuggestedPrice(dto.getSuggestedPrice());
         proposal.setWriter(dto.getWriter());
         repository.save(proposal);
@@ -82,6 +92,11 @@ public class ProposalService {
         if (!proposal.getPassword().equals(dto.getPassword())) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."
+            );
+        }
+        if (!proposal.getWriter().equals(dto.getWriter())) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "작성자가 일치하지 않습니다."
             );
         }
         repository.deleteById(proposalId);
