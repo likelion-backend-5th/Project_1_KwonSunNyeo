@@ -1,11 +1,11 @@
 package com.likelion.market.service;
 
+import com.likelion.market.dto.ItemDto;
 import com.likelion.market.dto.ItemPageDto;
 import com.likelion.market.dto.ItemReadDto;
-import com.likelion.market.repository.ItemRepository;
-import com.likelion.market.dto.ItemDto;
 import com.likelion.market.entity.ItemEntity;
 import com.likelion.market.entity.ItemStatus;
+import com.likelion.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -44,8 +44,9 @@ public class ItemService {
     // 물품 정보 - 단일 조회
     public ItemReadDto readItem(Long id) {
         Optional<ItemEntity> optionalItem = repository.findById(id);
-        if (optionalItem.isPresent())
+        if (optionalItem.isPresent()) {
             return ItemReadDto.fromEntity(optionalItem.get());
+        }
         else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
@@ -64,31 +65,29 @@ public class ItemService {
     // 물품 정보 - 수정
     public ItemDto updateItem(Long id, ItemDto dto) {
         Optional<ItemEntity> optionalItem = repository.findById(id);
-        if (optionalItem.isPresent()) {
-            ItemEntity item = optionalItem.get();
-            if (!item.getPassword().equals(dto.getPassword())) {
-                throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."
-                );
-            }
-            item.setTitle(dto.getTitle());
-            item.setDescription(dto.getDescription());
-            item.setWriter(dto.getWriter());
-            item.setPassword(dto.getPassword());
-            item.setStatus(dto.getStatus());
-            item.setMinPriceWanted(dto.getMinPriceWanted());
-            repository.save(item);
-            return ItemDto.fromEntity(item);
+        if (optionalItem.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        ItemEntity item = optionalItem.get();
+        if (!item.getPassword().equals(dto.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+        }
+        item.setTitle(dto.getTitle());
+        item.setDescription(dto.getDescription());
+        item.setWriter(dto.getWriter());
+        item.setPassword(dto.getPassword());
+        item.setStatus(dto.getStatus());
+        item.setMinPriceWanted(dto.getMinPriceWanted());
+        repository.save(item);
+        return ItemDto.fromEntity(item);
     }
 
     // 물품 정보 - 수정 - 이미지
     public ItemDto updateItemImage(Long id, MultipartFile itemImage) {
         Optional<ItemEntity> optionalItem = repository.findById(id);
-        if (optionalItem.isEmpty())
+        if (optionalItem.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
+        }
         // 폴더만 생성
         String imageDir = String.format("image/%d/", id);
         log.info(imageDir);
@@ -128,8 +127,11 @@ public class ItemService {
 
     // 물품 정보 - 수정 - 상태
     public void updateItemStatus(Long itemId, ItemStatus status) {
-        ItemEntity item = repository.findById(itemId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Optional<ItemEntity> optionalItem = repository.findById(itemId);
+        if (optionalItem.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        ItemEntity item = optionalItem.get();
         item.setStatus(status);
         repository.save(item);
     }
@@ -139,15 +141,11 @@ public class ItemService {
         Optional<ItemEntity> optionalItem = repository.findById(id);
         if (optionalItem.isPresent()) {
             ItemEntity item = optionalItem.get();
-            if (!item.getPassword().equals(dto.getPassword())) {
-                throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."
-                );
-            }
             if (!item.getWriter().equals(dto.getWriter())) {
-                throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "작성자가 일치하지 않습니다."
-                );
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
+            }
+            if (!item.getPassword().equals(dto.getPassword())) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
             }
             repository.deleteById(id);
         }
