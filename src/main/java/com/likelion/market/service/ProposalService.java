@@ -65,7 +65,7 @@ public class ProposalService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "구매를 제안한 작성자가 일치하지 않습니다.");
         }
         if (!proposal.getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "구매를 제안한 작성자의 비밀번호가 일치하지 않습니다.");
         }
         proposal.setSuggestedPrice(dto.getSuggestedPrice());
         proposalRepository.save(proposal);
@@ -88,7 +88,7 @@ public class ProposalService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
         }
         if (!item.getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
         }
         proposal.setStatus(dto.getStatus());
         proposalRepository.save(proposal);
@@ -106,7 +106,7 @@ public class ProposalService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "구매를 제안한 작성자가 일치하지 않습니다.");
         }
         if (!proposal.getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "구매를 제안한 작성자의 비밀번호가 일치하지 않습니다.");
         }
         if (proposal.getStatus() != ProposalStatus.ACCEPTED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "제안이 수락 상태가 아니면 확정할 수 없습니다.");
@@ -136,7 +136,7 @@ public class ProposalService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "구매를 제안한 작성자가 일치하지 않습니다.");
         }
         if (!proposal.getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "구매를 제안한 작성자의 비밀번호가 일치하지 않습니다.");
         }
         proposalRepository.deleteById(proposalId);
     }

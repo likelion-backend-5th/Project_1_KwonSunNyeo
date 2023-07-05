@@ -70,7 +70,7 @@ public class ItemService {
         }
         ItemEntity item = optionalItem.get();
         if (!item.getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
         }
         item.setTitle(dto.getTitle());
         item.setDescription(dto.getDescription());
@@ -90,7 +90,7 @@ public class ItemService {
         }
         ItemEntity item = optionalItem.get();
         if (!item.getPassword().equals(password)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
         }
         // 폴더만 생성
         String imageDir = String.format("image/%d/", id);
@@ -143,7 +143,7 @@ public class ItemService {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
             }
             if (!item.getPassword().equals(dto.getPassword())) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
             }
             repository.deleteById(id);
         }

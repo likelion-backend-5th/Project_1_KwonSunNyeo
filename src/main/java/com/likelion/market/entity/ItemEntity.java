@@ -12,8 +12,8 @@ public class ItemEntity {
     private Long id;
     private String title;
     private String description;
-    private String imageUrl;
     private int minPriceWanted;
+    private String imageUrl;
     private String writer;
     private String password;
 

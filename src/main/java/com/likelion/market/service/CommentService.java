@@ -60,7 +60,7 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         if (!comment.getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "댓글을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
         }
         comment.setContent(dto.getContent());
         comment.setWriter(dto.getWriter());
@@ -83,7 +83,7 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         if (!optionalItem.get().getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
         }
         comment.setReply(dto.getReply());
         commentRepository.save(comment);
@@ -104,7 +104,7 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "댓글을 등록한 작성자가 일치하지 않습니다.");
         }
         if (!comment.getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "댓글을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
         }
         commentRepository.deleteById(commentId);
     }
