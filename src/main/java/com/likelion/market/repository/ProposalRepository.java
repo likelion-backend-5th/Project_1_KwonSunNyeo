@@ -9,6 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ProposalRepository extends JpaRepository<ProposalEntity, Long> {
-    Page<ProposalEntity> findAllByItemId(Long id, Pageable pageable);
+    Page<ProposalEntity> findByItemIdAndWriterAndPassword(Long itemId, String writer, String password, Pageable pageable);
     List<ProposalEntity> findAllByItemIdAndStatus(Long itemId, ProposalStatus status);
 }

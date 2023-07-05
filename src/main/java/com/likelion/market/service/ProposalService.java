@@ -1,6 +1,7 @@
 package com.likelion.market.service;
 
 import com.likelion.market.dto.ProposalDto;
+import com.likelion.market.dto.ProposalPageDto;
 import com.likelion.market.entity.ItemEntity;
 import com.likelion.market.entity.ItemStatus;
 import com.likelion.market.entity.ProposalEntity;
@@ -41,15 +42,15 @@ public class ProposalService {
     }
 
     // 구매 제안 - 페이지 단위 조회
-    public Page<ProposalDto> readProposalPaged(
-            Long itemId, Integer pageNumber, Integer pageSize
+    public Page<ProposalPageDto> readProposalPaged(
+            Long itemId, String writer, String password, Integer pageNumber, Integer pageSize
     ) {
         Pageable pageable = PageRequest.of(
                 pageNumber, pageSize, Sort.by("id").descending()
         );
-        Page<ProposalEntity> proposalEntityPage = proposalRepository.findAllByItemId(itemId, pageable);
-        Page<ProposalDto> proposalDtoPage = proposalEntityPage.map(ProposalDto::fromEntity);
-        return proposalDtoPage;
+        Page<ProposalEntity> proposalEntityPage = proposalRepository.findByItemIdAndWriterAndPassword(itemId, writer, password, pageable);
+        Page<ProposalPageDto> proposalPageDtoPage = proposalEntityPage.map(ProposalPageDto::fromEntity);
+        return proposalPageDtoPage;
     }
 
     // 구매 제안 - 수정 - 가격

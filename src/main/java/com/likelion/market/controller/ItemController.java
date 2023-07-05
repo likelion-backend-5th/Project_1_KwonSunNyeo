@@ -1,8 +1,6 @@
 package com.likelion.market.controller;
 
-import com.likelion.market.dto.ItemDto;
-import com.likelion.market.dto.MessageResponseDto;
-import com.likelion.market.dto.ResponseDto;
+import com.likelion.market.dto.*;
 import com.likelion.market.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +21,9 @@ public class ItemController {
     // 물품 정보 - 등록
     // POST /items
     @PostMapping
-    public ResponseEntity<ResponseDto> create(@RequestBody ItemDto dto) {
+    public ResponseEntity<ResponseDto> create(
+            @RequestBody ItemDto dto
+    ) {
         service.createItem(dto);
         ResponseDto response = new ResponseDto();
         response.setMessage("등록이 완료되었습니다.");
@@ -34,17 +34,17 @@ public class ItemController {
     // 물품 정보 - 단일 조회
     // GET /items/{itemId}
     @GetMapping("/{id}")
-    public ResponseEntity<ItemDto> read(@PathVariable("id") Long id) {
-        ItemDto item = service.readItem(id);
+    public ResponseEntity<ItemReadDto> read(@PathVariable("id") Long id) {
+        ItemReadDto item = service.readItem(id);
         return new ResponseEntity<>(item, HttpStatus.OK);
     }
 
     // 물품 정보 - 페이지 단위 조회
     // GET /items?page={page}&limit={limit}
     @GetMapping
-    public Page<ItemDto> readAll(
+    public Page<ItemPageDto> readAll(
             @RequestParam(value = "page", defaultValue = "0") Integer page,
-            @RequestParam(value = "limit", defaultValue = "20") Integer limit
+            @RequestParam(value = "limit", defaultValue = "25") Integer limit
     ) {
         return service.readItemPaged(page, limit);
     }

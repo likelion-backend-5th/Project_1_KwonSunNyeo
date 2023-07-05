@@ -2,6 +2,7 @@ package com.likelion.market.controller;
 
 import com.likelion.market.dto.MessageResponseDto;
 import com.likelion.market.dto.ProposalDto;
+import com.likelion.market.dto.ProposalPageDto;
 import com.likelion.market.dto.ResponseDto;
 import com.likelion.market.service.ProposalService;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +34,16 @@ public class ProposalController {
     }
 
     // 구매 제안 - 페이지 단위 조회
-    // GET /items/{itemId}/proposals
+    // GET /items/{itemId}/proposals?writer={writer}&password={password}&{page}={page}
     @GetMapping
-    public Page<ProposalDto> readAll(
+    public Page<ProposalPageDto> readAll(
             @PathVariable("itemId") Long itemId,
+            @RequestParam(name = "writer", defaultValue = "") String writer,
+            @RequestParam(name = "password", defaultValue = "") String password,
             @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @RequestParam(name = "size", defaultValue = "10") Integer size
+            @RequestParam(name = "size", defaultValue = "25") Integer size
     ) {
-        return service.readProposalPaged(itemId, page, size);
+        return service.readProposalPaged(itemId, writer, password, page, size);
     }
 
     // 구매 제안 - 수정 - 가격

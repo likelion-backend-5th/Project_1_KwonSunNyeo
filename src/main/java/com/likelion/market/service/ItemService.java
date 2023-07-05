@@ -1,5 +1,7 @@
 package com.likelion.market.service;
 
+import com.likelion.market.dto.ItemPageDto;
+import com.likelion.market.dto.ItemReadDto;
 import com.likelion.market.repository.ItemRepository;
 import com.likelion.market.dto.ItemDto;
 import com.likelion.market.entity.ItemEntity;
@@ -40,23 +42,23 @@ public class ItemService {
     }
 
     // 물품 정보 - 단일 조회
-    public ItemDto readItem(Long id) {
+    public ItemReadDto readItem(Long id) {
         Optional<ItemEntity> optionalItem = repository.findById(id);
         if (optionalItem.isPresent())
-            return ItemDto.fromEntity(optionalItem.get());
+            return ItemReadDto.fromEntity(optionalItem.get());
         else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
     // 물품 정보 - 페이지 단위 조회
-    public Page<ItemDto> readItemPaged(
-            Integer pageNumber, Integer pageSize
+    public Page<ItemPageDto> readItemPaged(
+            Integer page, Integer limit
     ) {
         Pageable pageable = PageRequest.of(
-                pageNumber, pageSize, Sort.by("id").descending()
+                page, limit, Sort.by("id").descending()
         );
         Page<ItemEntity> itemEntityPage = repository.findAll(pageable);
-        Page<ItemDto> itemDtoPage = itemEntityPage.map(ItemDto::fromEntity);
-        return itemDtoPage;
+        Page<ItemPageDto> itemPageDtoPage = itemEntityPage.map(ItemPageDto::fromEntity);
+        return itemPageDtoPage;
     }
 
     // 물품 정보 - 수정

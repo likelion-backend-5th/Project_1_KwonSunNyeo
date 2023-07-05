@@ -1,5 +1,6 @@
 package com.likelion.market.service;
 
+import com.likelion.market.dto.CommentPageDto;
 import com.likelion.market.entity.ItemEntity;
 import com.likelion.market.repository.CommentRepository;
 import com.likelion.market.repository.ItemRepository;
@@ -36,15 +37,15 @@ public class CommentService {
     }
 
     // 물품 댓글 - 페이지 단위 조회
-    public Page<CommentDto> readCommentPaged(
-            Long itemId, Integer pageNumber, Integer pageSize
+    public Page<CommentPageDto> readCommentPaged(
+            Long itemId, Integer page, Integer limit
     ) {
         Pageable pageable = PageRequest.of(
-                pageNumber, pageSize, Sort.by("id").descending()
+                page, limit, Sort.by("id").descending()
         );
         Page<CommentEntity> commentEntityPage = commentRepository.findAllByItemId(itemId, pageable);
-        Page<CommentDto> commentDtoPage = commentEntityPage.map(CommentDto::fromEntity);
-        return commentDtoPage;
+        Page<CommentPageDto> commentPageDtoPage = commentEntityPage.map(CommentPageDto::fromEntity);
+        return commentPageDtoPage;
     }
 
     // 물품 댓글 - 수정

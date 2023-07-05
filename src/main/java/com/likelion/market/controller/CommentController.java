@@ -1,12 +1,16 @@
 package com.likelion.market.controller;
 
 import com.likelion.market.dto.CommentDto;
+import com.likelion.market.dto.CommentPageDto;
 import com.likelion.market.dto.MessageResponseDto;
 import com.likelion.market.dto.ResponseDto;
 import com.likelion.market.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,12 +39,11 @@ public class CommentController {
     // 물품 댓글 - 페이지 단위 조회
     // GET /items/{itemId}/comments
     @GetMapping
-    public Page<CommentDto> readAll(
+    public Page<CommentPageDto> readAll(
             @PathVariable("itemId") Long itemId,
-            @RequestParam(name = "page", defaultValue = "0") Integer page,
-            @RequestParam(name = "size", defaultValue = "10") Integer size
+            @PageableDefault(size = 25, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     ) {
-        return service.readCommentPaged(itemId, page, size);
+        return service.readCommentPaged(itemId, pageable.getPageNumber(), pageable.getPageSize());
     }
 
     // 물품 댓글 - 수정
