@@ -1,9 +1,11 @@
 package com.likelion.market.service;
 
-import com.likelion.market.repository.ItemRepository;
 import com.likelion.market.dto.ItemDto;
+import com.likelion.market.dto.ItemPageDto;
+import com.likelion.market.dto.ItemReadDto;
 import com.likelion.market.entity.ItemEntity;
 import com.likelion.market.entity.ItemStatus;
+import com.likelion.market.repository.ItemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -40,62 +42,56 @@ public class ItemService {
     }
 
     // 물품 정보 - 단일 조회
-    public ItemDto readItem(Long id) {
-        Optional<ItemEntity> optionalItem = repository.findById(id);
-        if (optionalItem.isPresent())
-            return ItemDto.fromEntity(optionalItem.get());
-        else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-    }
-
-    // 물품 정보 - 페이지 단위 조회
-    public Page<ItemDto> readItemPaged(
-            Integer pageNumber, Integer pageSize
-    ) {
-        Pageable pageable = PageRequest.of(
-                pageNumber, pageSize, Sort.by("id").descending()
-        );
-        Page<ItemEntity> itemEntityPage = repository.findAll(pageable);
-        Page<ItemDto> itemDtoPage = itemEntityPage.map(ItemDto::fromEntity);
-        return itemDtoPage;
-    }
-
-    // 물품 정보 - 전체 조회 -> 페이지 단위 조회와 중복이므로 주석 처리
-//    public List<ItemDto> readItemAll() {
-//        List<ItemDto> itemList = new ArrayList<>();
-//        for (ItemEntity entity: repository.findAll()) {
-//            itemList.add(ItemDto.fromEntity(entity));
-//        }
-//        return itemList;
-//    }
-
-    // 물품 정보 - 수정
-    public ItemDto updateItem(Long id, ItemDto dto) {
+    public ItemReadDto readItem(Long id) {
         Optional<ItemEntity> optionalItem = repository.findById(id);
         if (optionalItem.isPresent()) {
-            ItemEntity item = optionalItem.get();
-            if (!item.getPassword().equals(dto.getPassword())) {
-                throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."
-                );
-            }
-            item.setTitle(dto.getTitle());
-            item.setDescription(dto.getDescription());
-            item.setWriter(dto.getWriter());
-            item.setPassword(dto.getPassword());
-            item.setStatus(dto.getStatus());
-            item.setMinPriceWanted(dto.getMinPriceWanted());
-            repository.save(item);
-            return ItemDto.fromEntity(item);
+            return ItemReadDto.fromEntity(optionalItem.get());
         }
         else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
 
-    // 물품 정보 - 수정 - 이미지
-    public ItemDto updateItemImage(Long id, MultipartFile itemImage) {
-        Optional<ItemEntity> optionalItem = repository.findById(id);
-        if (optionalItem.isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    // 물품 정보 - 페이지 단위 조회
+    public Page<ItemPageDto> readItemPaged(
+            Integer page, Integer limit
+    ) {
+        Pageable pageable = PageRequest.of(
+                page, limit, Sort.by("id").descending()
+        );
+        Page<ItemEntity> itemEntityPage = repository.findAll(pageable);
+        Page<ItemPageDto> itemPageDtoPage = itemEntityPage.map(ItemPageDto::fromEntity);
+        return itemPageDtoPage;
+    }
 
+    // 물품 정보 - 수정
+    public ItemDto updateItem(Long id, ItemDto dto) {
+        Optional<ItemEntity> optionalItem = repository.findById(id);
+        if (optionalItem.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        ItemEntity item = optionalItem.get();
+        if (!item.getPassword().equals(dto.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
+        }
+        item.setTitle(dto.getTitle());
+        item.setDescription(dto.getDescription());
+        item.setWriter(dto.getWriter());
+        item.setPassword(dto.getPassword());
+        item.setStatus(dto.getStatus());
+        item.setMinPriceWanted(dto.getMinPriceWanted());
+        repository.save(item);
+        return ItemDto.fromEntity(item);
+    }
+
+    // 물품 정보 - 수정 - 이미지
+    public ItemDto updateItemImage(Long id, MultipartFile itemImage, String password) {
+        Optional<ItemEntity> optionalItem = repository.findById(id);
+        if (optionalItem.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        ItemEntity item = optionalItem.get();
+        if (!item.getPassword().equals(password)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
+        }
         // 폴더만 생성
         String imageDir = String.format("image/%d/", id);
         log.info(imageDir);
@@ -105,18 +101,15 @@ public class ItemService {
             log.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         // 확장자를 포함한 이미지 이름 생성
         String originalFilename = itemImage.getOriginalFilename();
         String[] fileNameSplit = originalFilename.split("\\.");
         String extension = fileNameSplit[fileNameSplit.length - 1];
         String imageFilename = "image." + extension;
         log.info(imageFilename);
-
         // 폴더와 파일 경로를 포함한 이름 생성
         String imagePath = imageDir + imageFilename;
         log.info(imagePath);
-
         // MultipartFile 저장
         try {
             itemImage.transferTo(Path.of(imagePath));
@@ -124,19 +117,19 @@ public class ItemService {
             log.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         log.info(String.format("/static/%d/%s", id, imageFilename));
-
-        ItemEntity userEntity = optionalItem.get();
-        userEntity.setImageUrl(String.format("/static/%d/%s", id, imageFilename));
-        repository.save(userEntity);
-        return ItemDto.fromEntity(repository.save(userEntity));
+        item.setImageUrl(String.format("/static/%d/%s", id, imageFilename));
+        repository.save(item);
+        return ItemDto.fromEntity(item);
     }
 
     // 물품 정보 - 수정 - 상태
     public void updateItemStatus(Long itemId, ItemStatus status) {
-        ItemEntity item = repository.findById(itemId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        Optional<ItemEntity> optionalItem = repository.findById(itemId);
+        if (optionalItem.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        ItemEntity item = optionalItem.get();
         item.setStatus(status);
         repository.save(item);
     }
@@ -146,15 +139,11 @@ public class ItemService {
         Optional<ItemEntity> optionalItem = repository.findById(id);
         if (optionalItem.isPresent()) {
             ItemEntity item = optionalItem.get();
-            if (!item.getPassword().equals(dto.getPassword())) {
-                throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."
-                );
-            }
             if (!item.getWriter().equals(dto.getWriter())) {
-                throw new ResponseStatusException(
-                        HttpStatus.UNAUTHORIZED, "작성자가 일치하지 않습니다."
-                );
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
+            }
+            if (!item.getPassword().equals(dto.getPassword())) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
             }
             repository.deleteById(id);
         }
