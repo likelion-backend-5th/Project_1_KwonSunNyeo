@@ -43,15 +43,6 @@ public class CommentController {
         return service.readCommentPaged(itemId, page, size);
     }
 
-    // 물품 댓글 - 전체 조회 -> 페이지 단위 조회와 중복이므로 주석 처리
-//    // GET /items/{itemId}/comments
-//    @GetMapping
-//    public List<CommentDto> readAll(
-//            @PathVariable("itemId") Long itemId
-//    ) {
-//        return service.readCommentAll(itemId);
-//    }
-
     // 물품 댓글 - 수정
     // PUT /items/{itemId}/comments/{commentId}
     @PutMapping("/{commentId}")

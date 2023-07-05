@@ -59,15 +59,6 @@ public class ItemService {
         return itemDtoPage;
     }
 
-    // 물품 정보 - 전체 조회 -> 페이지 단위 조회와 중복이므로 주석 처리
-//    public List<ItemDto> readItemAll() {
-//        List<ItemDto> itemList = new ArrayList<>();
-//        for (ItemEntity entity: repository.findAll()) {
-//            itemList.add(ItemDto.fromEntity(entity));
-//        }
-//        return itemList;
-//    }
-
     // 물품 정보 - 수정
     public ItemDto updateItem(Long id, ItemDto dto) {
         Optional<ItemEntity> optionalItem = repository.findById(id);

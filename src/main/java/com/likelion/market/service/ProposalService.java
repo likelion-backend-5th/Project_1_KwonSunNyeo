@@ -52,17 +52,6 @@ public class ProposalService {
         return proposalDtoPage;
     }
 
-    // 구매 제안 - 전체 조회 -> 페이지 단위 조회와 중복이므로 주석 처리
-//    public List<ProposalDto> readProposalAll(Long itemId) {
-//        List<ProposalEntity> proposalEntities
-//                = proposalRepository.findAllByItemId(itemId);
-//        List<ProposalDto> proposalList = new ArrayList<>();
-//        for (ProposalEntity entity: proposalEntities) {
-//            proposalList.add(ProposalDto.fromEntity(entity));
-//        }
-//        return proposalList;
-//    }
-
     // 구매 제안 - 수정 - 가격
     public ProposalDto updateProposalPrice(Long itemId, Long proposalId, ProposalDto dto) {
         ProposalEntity proposal = proposalRepository.findById(proposalId)

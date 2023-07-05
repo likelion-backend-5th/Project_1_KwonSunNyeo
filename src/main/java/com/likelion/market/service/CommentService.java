@@ -47,17 +47,6 @@ public class CommentService {
         return commentDtoPage;
     }
 
-    // 물품 댓글 - 전체 조회 -> 페이지 단위 조회와 중복이므로 주석 처리
-//    public List<CommentDto> readCommentAll(Long itemId) {
-//        List<CommentEntity> commentEntities
-//                = commentRepository.findAllByItemId(itemId);
-//        List<CommentDto> commentList = new ArrayList<>();
-//        for (CommentEntity entity: commentEntities) {
-//            commentList.add(CommentDto.fromEntity(entity));
-//        }
-//        return commentList;
-//    }
-
     // 물품 댓글 - 수정
     public CommentDto updateComment(Long itemId, Long commentId, CommentDto dto) {
         Optional<CommentEntity> optionalComment = commentRepository.findById(commentId);

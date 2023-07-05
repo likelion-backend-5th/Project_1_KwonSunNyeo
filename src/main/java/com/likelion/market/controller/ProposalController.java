@@ -43,15 +43,6 @@ public class ProposalController {
         return service.readProposalPaged(itemId, page, size);
     }
 
-    // 구매 제안 - 전체 조회 -> 페이지 단위 조회와 중복이므로 주석 처리
-//    // GET /items/{itemId}/proposals
-//    @GetMapping
-//    public List<ProposalDto> readAll(
-//            @PathVariable("itemId") Long itemId
-//    ) {
-//        return service.readProposalAll(itemId);
-//    }
-
     // 구매 제안 - 수정 - 가격
     // PUT /items/{itemId}/proposals/{proposalId}/price
     @PutMapping("/{proposalId}/price")

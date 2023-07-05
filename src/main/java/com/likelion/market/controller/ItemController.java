@@ -49,13 +49,6 @@ public class ItemController {
         return service.readItemPaged(page, limit);
     }
 
-    // 물품 정보 - 전체 조회 -> 페이지 단위 조회와 중복이므로 주석 처리
-//    // GET /items
-//    @GetMapping
-//    public List<ItemDto> readAll() {
-//        return service.readItemAll();
-//    }
-
     // 물품 정보 - 수정
     // PUT /items/{itemId}
     @PutMapping("/{id}")
