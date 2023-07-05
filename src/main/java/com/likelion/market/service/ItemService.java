@@ -83,10 +83,14 @@ public class ItemService {
     }
 
     // 물품 정보 - 수정 - 이미지
-    public ItemDto updateItemImage(Long id, MultipartFile itemImage) {
+    public ItemDto updateItemImage(Long id, MultipartFile itemImage, String password) {
         Optional<ItemEntity> optionalItem = repository.findById(id);
         if (optionalItem.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        ItemEntity item = optionalItem.get();
+        if (!item.getPassword().equals(password)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
         }
         // 폴더만 생성
         String imageDir = String.format("image/%d/", id);
@@ -97,18 +101,15 @@ public class ItemService {
             log.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         // 확장자를 포함한 이미지 이름 생성
         String originalFilename = itemImage.getOriginalFilename();
         String[] fileNameSplit = originalFilename.split("\\.");
         String extension = fileNameSplit[fileNameSplit.length - 1];
         String imageFilename = "image." + extension;
         log.info(imageFilename);
-
         // 폴더와 파일 경로를 포함한 이름 생성
         String imagePath = imageDir + imageFilename;
         log.info(imagePath);
-
         // MultipartFile 저장
         try {
             itemImage.transferTo(Path.of(imagePath));
@@ -116,13 +117,10 @@ public class ItemService {
             log.error(e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         log.info(String.format("/static/%d/%s", id, imageFilename));
-
-        ItemEntity userEntity = optionalItem.get();
-        userEntity.setImageUrl(String.format("/static/%d/%s", id, imageFilename));
-        repository.save(userEntity);
-        return ItemDto.fromEntity(repository.save(userEntity));
+        item.setImageUrl(String.format("/static/%d/%s", id, imageFilename));
+        repository.save(item);
+        return ItemDto.fromEntity(item);
     }
 
     // 물품 정보 - 수정 - 상태

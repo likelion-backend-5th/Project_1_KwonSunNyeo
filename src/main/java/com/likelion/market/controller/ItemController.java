@@ -70,9 +70,10 @@ public class ItemController {
     )
     public ResponseEntity<MessageResponseDto> image(
             @PathVariable("id") Long id,
-            @RequestParam("image") MultipartFile itemImage
+            @RequestParam("image") MultipartFile itemImage,
+            @RequestParam("password") String password
     ) {
-        service.updateItemImage(id, itemImage);
+        service.updateItemImage(id, itemImage, password);
         MessageResponseDto response = new MessageResponseDto();
         response.setMessage("이미지가 등록되었습니다.");
         return new ResponseEntity<>(response, HttpStatus.OK);
