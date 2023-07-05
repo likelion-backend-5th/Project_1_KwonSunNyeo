@@ -49,29 +49,30 @@ For building and running the project you need:
 ## 주요 기능 📝
 
 ### 1️⃣ 물품 등록 (Item)
-- **중고 거래**를 목적으로 물품에 대한 정보 등록
+- [중고 거래](https://github.com/likelion-backend-5th/MiniProject_Basic_KwonSunNyeo/commits/day1)를 목적으로 물품에 대한 정보 등록
 - 해당 정보는 누구나 조회 가능
 - 해당 정보는 수정 및 삭제 그리고 이미지 첨부 가능
 
 ### 2️⃣ 댓글 등록 (Comment)
-- **등록된 물품에 대한 질문**을 목적으로 댓글 등록
+- [등록된 물품에 대한 질문](https://github.com/likelion-backend-5th/MiniProject_Basic_KwonSunNyeo/commits/day2)을 목적으로 댓글 등록
 - 해당 댓글은 누구나 조회 가능
 - 해당 댓글은 수정 및 삭제 가능
 - 해당 댓글의 답글 등록 및 수정 가능
 
 ### 3️⃣ 구매 제안 (Proposal)
-- **등록된 물품에 대한 구매 제안**을 목적으로 제안 등록
+- [등록된 물품에 대한 구매 제안](https://github.com/likelion-backend-5th/MiniProject_Basic_KwonSunNyeo/commits/day3)을 목적으로 제안 등록
 - 해당 제안은 물품의 주인과 제안을 등록한 사용자만 가능
 - 해당 제안은 수정 및 삭제 가능
 - 대상 물품의 주인은 구매 제안을 수락 및 거절 가능
 - 해당 제안을 등록한 사용자는 수락 상태인 경우 구매 확정 가능
+- [가독성을 높이기 위한 리팩토링](https://github.com/likelion-backend-5th/MiniProject_Basic_KwonSunNyeo/commits/refactor)
 
 ---
 ## Architecture 📦
 
 ### 디렉토리 구조
 <details>
-<summary>여기를 눌러주세요</summary>
+<summary>여기를 눌러주세요!🌱</summary>
 
 ```bash
 📦market
