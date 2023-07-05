@@ -133,6 +133,14 @@ public class ItemService {
         return ItemDto.fromEntity(repository.save(userEntity));
     }
 
+    // 물품 정보 - 수정 - 상태
+    public void updateItemStatus(Long itemId, ItemStatus status) {
+        ItemEntity item = repository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        item.setStatus(status);
+        repository.save(item);
+    }
+
     // 물품 정보 - 삭제
     public void deleteItem(Long id, ItemDto dto) {
         Optional<ItemEntity> optionalItem = repository.findById(id);

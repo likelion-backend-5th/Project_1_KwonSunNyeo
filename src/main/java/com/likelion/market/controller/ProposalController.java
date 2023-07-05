@@ -80,6 +80,20 @@ public class ProposalController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    // 물품 정보, 구매 제안 - 수정 - 상태
+    // PUT /items/{itemId}/proposals/{proposalId}/confirm
+    @PutMapping("/{proposalId}/confirm")
+    public ResponseEntity<MessageResponseDto> confirmProposal(
+            @PathVariable Long itemId,
+            @PathVariable Long proposalId,
+            @RequestBody ProposalDto dto
+    ) {
+        service.confirmProposal(itemId, proposalId, dto);
+        MessageResponseDto response = new MessageResponseDto();
+        response.setMessage("구매가 확정되었습니다.");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     // 구매 제안 - 삭제
     // DELETE /items/{itemId}/proposals/{proposalId}
     @DeleteMapping("/{proposalId}")

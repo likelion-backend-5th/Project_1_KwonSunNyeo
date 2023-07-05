@@ -2,6 +2,7 @@ package com.likelion.market.service;
 
 import com.likelion.market.dto.ProposalDto;
 import com.likelion.market.entity.ItemEntity;
+import com.likelion.market.entity.ItemStatus;
 import com.likelion.market.entity.ProposalEntity;
 import com.likelion.market.entity.ProposalStatus;
 import com.likelion.market.repository.ItemRepository;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,6 +24,7 @@ import java.util.Optional;
 public class ProposalService {
     private final ProposalRepository proposalRepository;
     private final ItemRepository itemRepository;
+    private final ItemService itemService;
 
     // 구매 제안 - 등록
     public ProposalDto createProposal(Long itemId, ProposalDto dto) {
@@ -97,6 +100,36 @@ public class ProposalService {
         }
         proposal.setStatus(dto.getStatus());
         proposalRepository.save(proposal);
+        return ProposalDto.fromEntity(proposal);
+    }
+
+    // 물품 정보, 구매 제안 - 수정 - 상태
+    public ProposalDto confirmProposal(Long itemId, Long proposalId, ProposalDto dto) {
+        ProposalEntity proposal = proposalRepository.findById(proposalId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!proposal.getWriter().equals(dto.getWriter())) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "작성자가 일치하지 않습니다."
+            );
+        }
+        if (!proposal.getPassword().equals(dto.getPassword())) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."
+            );
+        }
+        if (proposal.getStatus() != ProposalStatus.ACCEPTED) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "제안이 수락 상태가 아니면 확정할 수 없습니다."
+            );
+        }
+        proposal.setStatus(ProposalStatus.CONFIRMED);
+        proposalRepository.save(proposal);
+        itemService.updateItemStatus(itemId, ItemStatus.SOLD_OUT);
+        List<ProposalEntity> proposals = proposalRepository.findAllByItemIdAndStatus(itemId, ProposalStatus.PROPOSED);
+        for (ProposalEntity otherProposal : proposals) {
+            otherProposal.setStatus(ProposalStatus.REJECTED);
+            proposalRepository.save(otherProposal);
+        }
         return ProposalDto.fromEntity(proposal);
     }
 
