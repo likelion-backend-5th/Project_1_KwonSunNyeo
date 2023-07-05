@@ -60,24 +60,42 @@ public class ProposalService {
 //        return proposalList;
 //    }
 
-    // 구매 제안 - 수정
-    public ProposalDto updateProposal(Long itemId, Long proposalId, ProposalDto dto) {
+    // 구매 제안 - 수정 - 가격
+    public ProposalDto updateProposalPrice(Long itemId, Long proposalId, ProposalDto dto) {
+        ProposalEntity proposal = proposalRepository.findById(proposalId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!proposal.getWriter().equals(dto.getWriter())) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "작성자가 일치하지 않습니다."
+            );
+        }
+        if (!proposal.getPassword().equals(dto.getPassword())) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."
+            );
+        }
+        proposal.setSuggestedPrice(dto.getSuggestedPrice());
+        proposalRepository.save(proposal);
+        return ProposalDto.fromEntity(proposal);
+    }
+
+    // 구매 제안 - 수정 - 상태
+    public ProposalDto updateProposalStatus(Long itemId, Long proposalId, ProposalDto dto) {
         ItemEntity item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         ProposalEntity proposal = proposalRepository.findById(proposalId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        if (!itemId.equals(proposal.getItemId()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        if (proposal.getWriter().equals(dto.getWriter()) && proposal.getPassword().equals(dto.getPassword())) {
-            // 제안을 등록한 사람만 가격 수정 가능
-            if (dto.getSuggestedPrice() != 0)
-                proposal.setSuggestedPrice(dto.getSuggestedPrice());
+        if (!item.getWriter().equals(dto.getWriter())) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "작성자가 일치하지 않습니다."
+            );
         }
-        if (item.getWriter().equals(dto.getWriter()) && item.getPassword().equals(dto.getPassword())) {
-            // 물품을 등록한 사람만 상태 변경 가능
-            if (dto.getStatus() != null)
-                proposal.setStatus(dto.getStatus());
+        if (!item.getPassword().equals(dto.getPassword())) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다."
+            );
         }
+        proposal.setStatus(dto.getStatus());
         proposalRepository.save(proposal);
         return ProposalDto.fromEntity(proposal);
     }

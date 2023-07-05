@@ -52,17 +52,31 @@ public class ProposalController {
 //        return service.readProposalAll(itemId);
 //    }
 
-    // 구매 제안 - 수정
-    // PUT /items/{itemId}/proposals/{proposalId}
-    @PutMapping("/{proposalId}")
+    // 구매 제안 - 수정 - 가격
+    // PUT /items/{itemId}/proposals/{proposalId}/price
+    @PutMapping("/{proposalId}/price")
     public ResponseEntity<MessageResponseDto> update(
             @PathVariable("itemId") Long itemId,
             @PathVariable("proposalId") Long proposalId,
             @RequestBody ProposalDto dto
     ) {
-        service.updateProposal(itemId, proposalId, dto);
+        service.updateProposalPrice(itemId, proposalId, dto);
         MessageResponseDto response = new MessageResponseDto();
         response.setMessage("제안이 수정되었습니다.");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    // 구매 제안 - 수정 - 상태
+    // PUT /items/{itemId}/proposals/{proposalId}/status
+    @PutMapping("/{proposalId}/status")
+    public ResponseEntity<MessageResponseDto> updateStatus(
+            @PathVariable("itemId") Long itemId,
+            @PathVariable("proposalId") Long proposalId,
+            @RequestBody ProposalDto dto
+    ) {
+        service.updateProposalStatus(itemId, proposalId, dto);
+        MessageResponseDto response = new MessageResponseDto();
+        response.setMessage("제안의 상태가 변경되었습니다.");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
