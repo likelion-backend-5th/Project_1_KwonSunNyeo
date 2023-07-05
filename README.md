@@ -70,6 +70,9 @@ For building and running the project you need:
 ## Architecture 📦
 
 ### 디렉토리 구조
+<details>
+<summary>여기를 눌러주세요</summary>
+
 ```bash
 📦market
  ┣ 📂gradle
@@ -92,9 +95,9 @@ For building and running the project you need:
  ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📜ResponseDto.java
  ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📜CommentDto.java
  ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📜ProposalDto.java
- ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📜ItemReadDto.java
- ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📜ItemPageDto.java
  ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📜CommentPageDto.java
+ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📜ItemPageDto.java
+ ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📜ItemReadDto.java
  ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┗ 📜ProposalPageDto.java
  ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📂entity
  ┃ ┃ ┃ ┃ ┃ ┃ ┃ ┣ 📜ItemEntity.java
@@ -122,9 +125,49 @@ For building and running the project you need:
  ┃ ┃ ┃ ┃ ┗ 📂likelion
  ┃ ┃ ┃ ┃ ┃ ┗ 📂market
  ┃ ┃ ┃ ┃ ┃ ┃ ┗ 📜MarketApplicationTests.java
- ┣ 📂image
+┣ 📂image
  ┃ ┗ 📂1
  ┃ ┃ ┗ 📜image.png
+ ┣ 📂reference-data
+ ┃ ┣ 📂day1
+ ┃ ┃ ┣ 📜day1_delete.png
+ ┃ ┃ ┣ 📜day1_delete_error.png
+ ┃ ┃ ┣ 📜day1_delete_error_.png
+ ┃ ┃ ┣ 📜day1_get.png
+ ┃ ┃ ┣ 📜day1_get_page.png
+ ┃ ┃ ┣ 📜day1_post.png
+ ┃ ┃ ┣ 📜day1_put.png
+ ┃ ┃ ┣ 📜day1_put_error.png
+ ┃ ┃ ┣ 📜day1_put_image.png
+ ┃ ┃ ┗ 📜day1_put_image_error.png
+ ┃ ┣ 📂day2
+ ┃ ┃ ┣ 📜day2_delete.png
+ ┃ ┃ ┣ 📜day2_delete_error.png
+ ┃ ┃ ┣ 📜day2_delete_error_.png
+ ┃ ┃ ┣ 📜day2_get.png
+ ┃ ┃ ┣ 📜day2_post.png
+ ┃ ┃ ┣ 📜day2_put.png
+ ┃ ┃ ┣ 📜day2_put_error.png
+ ┃ ┃ ┣ 📜day2_put_reply.png
+ ┃ ┃ ┗ 📜day2_put_reply_error.png
+ ┃ ┣ 📂day3
+ ┃ ┃ ┣ 📜day3_delete.png
+ ┃ ┃ ┣ 📜day3_delete_error.png
+ ┃ ┃ ┣ 📜day3_delete_error_.png
+ ┃ ┃ ┣ 📜day3_get.png
+ ┃ ┃ ┣ 📜day3_get_status.png
+ ┃ ┃ ┣ 📜day3_post.png
+ ┃ ┃ ┣ 📜day3_put_confirm.png
+ ┃ ┃ ┣ 📜day3_put_confirm_error.png
+ ┃ ┃ ┣ 📜day3_put_confirm_error_.png
+ ┃ ┃ ┣ 📜day3_put_confirm_error_1.png
+ ┃ ┃ ┣ 📜day3_put_price.png
+ ┃ ┃ ┣ 📜day3_put_price_error.png
+ ┃ ┃ ┣ 📜day3_put_price_error_.png
+ ┃ ┃ ┣ 📜day3_put_status.png
+ ┃ ┃ ┣ 📜day3_put_status_error.png
+ ┃ ┃ ┗ 📜day3_put_status_error_.png
+ ┃ ┗ 📜0629-0705 project.postman_collection.json
  ┣ 📜.gitignore
  ┣ 📜build.gradle
  ┣ 📜gradlew
@@ -134,3 +177,4 @@ For building and running the project you need:
  ┣ 📜db.sqlite
  ┗ 📜README.md
 ```
+</details>
