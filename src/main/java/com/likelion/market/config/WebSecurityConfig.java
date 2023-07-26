@@ -45,7 +45,7 @@ public class WebSecurityConfig {
     }
 
     // 사용자 관리
-    @Bean
+//    @Bean
     public UserDetailsManager userDetailsManager(
             PasswordEncoder passwordEncoder
     ) {
