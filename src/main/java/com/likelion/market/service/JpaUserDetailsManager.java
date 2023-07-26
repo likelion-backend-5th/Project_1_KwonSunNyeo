@@ -1,10 +1,10 @@
 package com.likelion.market.service;
 
+import com.likelion.market.domain.CustomUserDetails;
 import com.likelion.market.entity.UserEntity;
 import com.likelion.market.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,8 +24,12 @@ public class JpaUserDetailsManager implements UserDetailsManager {
             PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
-        createUser(User.withUsername("user")
+        createUser(CustomUserDetails.builder()
+                .username("user")
                 .password(passwordEncoder.encode("asdf"))
+                .phone("010-1234-5678")
+                .email("user@gmail.com")
+                .address("지구 어딘가")
                 .build());
     }
 
@@ -36,10 +40,7 @@ public class JpaUserDetailsManager implements UserDetailsManager {
                 = userRepository.findByUsername(username);
         if (optionalUser.isEmpty())
             throw new UsernameNotFoundException(username);
-        UserEntity userEntity = optionalUser.get();
-        return User.withUsername(userEntity.getUsername())
-                .password(userEntity.getPassword())
-                .build();
+        return CustomUserDetails.fromEntity(optionalUser.get());
     }
 
     @Override
@@ -49,10 +50,13 @@ public class JpaUserDetailsManager implements UserDetailsManager {
         // 사용자가 이미 존재한다면 생성할 수 없다.
         if (this.userExists(user.getUsername()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(user.getUsername());
-        userEntity.setPassword(user.getPassword());
-        this.userRepository.save(userEntity);
+        try {
+            userRepository.save(
+                    ((CustomUserDetails) user).newEntity());
+        } catch (ClassCastException e) {
+            log.error("failed to cast to {}", CustomUserDetails.class);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override

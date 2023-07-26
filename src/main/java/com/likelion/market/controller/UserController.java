@@ -1,9 +1,8 @@
 package com.likelion.market.controller;
 
+import com.likelion.market.domain.CustomUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Controller;
@@ -28,9 +27,12 @@ public class UserController {
             Authentication authentication
     ) {
         // 현재 접속중인 아이디 출력
-        log.info(authentication.getName());
-        log.info(((User) authentication.getPrincipal()).getUsername());
-        log.info(SecurityContextHolder.getContext().getAuthentication().getName());
+        CustomUserDetails userDetails
+                = (CustomUserDetails) authentication.getPrincipal();
+        log.info(userDetails.getUsername());
+        log.info(userDetails.getPhone());
+        log.info(userDetails.getEmail());
+        log.info(userDetails.getAddress());
         return "my-profile";
     }
 
@@ -61,7 +63,8 @@ public class UserController {
         // 입력받은 비밀번호와 비밀번호 확인 값이 일치하는 경우, 사용자 생성 및 로그인 페이지로 이동
         if (password.equals(passwordCheck)) {
             log.info("password match!");
-            manager.createUser(User.withUsername(username)
+            manager.createUser(CustomUserDetails.builder()
+                    .username(username)
                     .password(passwordEncoder.encode(password))
                     .build());
             return "redirect:/users/login";
