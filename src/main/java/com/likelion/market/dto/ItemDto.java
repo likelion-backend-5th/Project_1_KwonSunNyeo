@@ -2,6 +2,7 @@ package com.likelion.market.dto;
 
 import com.likelion.market.entity.ItemEntity;
 import com.likelion.market.entity.ItemStatus;
+import com.likelion.market.entity.UserEntity;
 import lombok.Data;
 
 @Data
@@ -11,7 +12,7 @@ public class ItemDto {
     private String description;
     private String imageUrl;
     private int minPriceWanted;
-    private String writer;
+    private Long userId;
     private String password;
     private ItemStatus status;
 
@@ -22,9 +23,20 @@ public class ItemDto {
         dto.setDescription(entity.getDescription());
         dto.setImageUrl(entity.getImageUrl());
         dto.setMinPriceWanted(entity.getMinPriceWanted());
-        dto.setWriter(entity.getWriter());
+        dto.setUserId(entity.getUser().getId());
         dto.setPassword(entity.getPassword());
         dto.setStatus(entity.getStatus());
         return dto;
+    }
+
+    public ItemEntity newEntity(UserEntity user) {
+        ItemEntity entity = new ItemEntity();
+        entity.setTitle(title);
+        entity.setDescription(description);
+        entity.setImageUrl(imageUrl);
+        entity.setMinPriceWanted(minPriceWanted);
+        entity.setUser(user);
+        entity.setStatus(ItemStatus.FOR_SALE);
+        return entity;
     }
 }

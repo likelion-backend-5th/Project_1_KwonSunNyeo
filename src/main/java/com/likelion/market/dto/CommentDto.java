@@ -7,7 +7,7 @@ import lombok.Data;
 public class CommentDto {
     private Long id;
     private Long itemId;
-    private String writer;
+    private Long userId;
     private String password;
     private String content;
     private String reply;
@@ -15,11 +15,19 @@ public class CommentDto {
     public static CommentDto fromEntity(CommentEntity entity) {
         CommentDto dto = new CommentDto();
         dto.setId(entity.getId());
-        dto.setItemId(entity.getItemId());
-        dto.setWriter(entity.getWriter());
+        dto.setItemId(entity.getItem().getId());
+        dto.setUserId(entity.getUser().getId());
         dto.setPassword(entity.getPassword());
         dto.setContent(entity.getContent());
         dto.setReply(entity.getReply());
         return dto;
+    }
+
+    public CommentEntity newEntity() {
+        CommentEntity entity = new CommentEntity();
+        entity.setPassword(password);
+        entity.setContent(content);
+        entity.setReply(reply);
+        return entity;
     }
 }
