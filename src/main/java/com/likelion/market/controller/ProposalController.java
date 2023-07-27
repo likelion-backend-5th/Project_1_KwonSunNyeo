@@ -26,7 +26,7 @@ public class ProposalController {
             @PathVariable("itemId") Long itemId,
             @RequestBody ProposalDto dto
     ) {
-        service.createProposal(itemId, dto);
+        service.createProposal(itemId, dto.getWriter(), dto.getPassword(), dto);
         ResponseDto response = new ResponseDto();
         response.setMessage("구매 제안이 등록되었습니다.");
         response.setStatus(200);
@@ -54,7 +54,7 @@ public class ProposalController {
             @PathVariable("proposalId") Long proposalId,
             @RequestBody ProposalDto dto
     ) {
-        service.updateProposalPrice(itemId, proposalId, dto);
+        service.updateProposalPrice(proposalId, dto.getWriter(), dto.getPassword(), dto.getSuggestedPrice());
         MessageResponseDto response = new MessageResponseDto();
         response.setMessage("제안이 수정되었습니다.");
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -96,7 +96,7 @@ public class ProposalController {
             @PathVariable("proposalId") Long proposalId,
             @RequestBody ProposalDto dto
     ) {
-        service.deleteProposal(itemId, proposalId, dto);
+        service.deleteProposal(proposalId, dto.getWriter(), dto.getPassword());
         MessageResponseDto response = new MessageResponseDto();
         response.setMessage("제안을 삭제했습니다.");
         return new ResponseEntity<>(response, HttpStatus.OK);
