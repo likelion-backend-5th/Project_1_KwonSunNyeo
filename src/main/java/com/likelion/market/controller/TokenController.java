@@ -5,6 +5,7 @@ import com.likelion.market.jwt.JwtTokenDto;
 import com.likelion.market.jwt.JwtTokenUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -44,5 +45,17 @@ public class TokenController {
         JwtTokenDto response = new JwtTokenDto();
         response.setToken(jwtTokenUtils.generateToken(userDetails));
         return response;
+    }
+
+    // 인증이 필요한 URL
+    // 사용자가 정상적으로 인증된 경우에만 접근 가능
+    @PostMapping("/secured")
+    public String checkSecure() {
+        log.info(SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName()
+        );
+        return "success";
     }
 }
