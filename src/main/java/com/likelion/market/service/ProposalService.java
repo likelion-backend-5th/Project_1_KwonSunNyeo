@@ -51,7 +51,7 @@ public class ProposalService {
         Pageable pageable = PageRequest.of(
                 pageNumber, pageSize, Sort.by("id").descending()
         );
-        Page<ProposalEntity> proposalEntityPage = proposalRepository.findByItemIdAndUserAndPassword(itemId, writer, password, pageable);
+        Page<ProposalEntity> proposalEntityPage = proposalRepository.findByItemIdAndUser_UsernameAndPassword(itemId, writer, password, pageable);
         Page<ProposalPageDto> proposalPageDtoPage = proposalEntityPage.map(ProposalPageDto::fromEntity);
         return proposalPageDtoPage;
     }
