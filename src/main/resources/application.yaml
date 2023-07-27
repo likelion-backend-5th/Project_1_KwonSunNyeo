@@ -4,7 +4,7 @@ spring:
     driver-class-name: org.sqlite.JDBC
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
     database-platform: org.hibernate.community.dialect.SQLiteDialect
     defer-datasource-initialization: true
@@ -23,3 +23,6 @@ spring:
     resources:
       # 정적 파일 탐색 장소
       static-locations: file:media/,classpath:/static
+
+jwt:
+  secret: thegreatestgloryinlivingliesnotinneverfallingbutinrisingeverytimewefall
