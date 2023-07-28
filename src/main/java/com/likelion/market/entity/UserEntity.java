@@ -1,5 +1,6 @@
 package com.likelion.market.entity;
 
+import com.likelion.market.domain.CustomUserDetails;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -35,4 +36,20 @@ public class UserEntity {
     // 사용자는 여러 제안을 할 수 있다.
     @OneToMany(mappedBy = "user")
     private List<ProposalEntity> proposals;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER; // 기본값
+
+    // UserEntity 에서 CustomUserDetails 생성
+    public static CustomUserDetails fromEntity(UserEntity entity) {
+        return CustomUserDetails.builder()
+                .id(entity.getId())
+                .username(entity.getUsername())
+                .password(entity.getPassword())
+                .phone(entity.getPhone())
+                .email(entity.getEmail())
+                .address(entity.getAddress())
+                .role(entity.getRole())
+                .build();
+    }
 }
