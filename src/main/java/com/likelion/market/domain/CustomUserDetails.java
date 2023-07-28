@@ -1,14 +1,18 @@
 package com.likelion.market.domain;
 
+import com.likelion.market.entity.Role;
 import com.likelion.market.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Builder
 @NoArgsConstructor
@@ -24,10 +28,14 @@ public class CustomUserDetails implements UserDetails {
     private String email;
     @Getter
     private String address;
+    @Getter
+    private Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(role.name()));
+        return authorities;
     }
 
     @Override
@@ -69,10 +77,11 @@ public class CustomUserDetails implements UserDetails {
                 .phone(entity.getPhone())
                 .email(entity.getEmail())
                 .address(entity.getAddress())
+                .role(entity.getRole())
                 .build();
     }
 
-    // CustomUserDetails 에서 UserEntity 를 생성
+    // CustomUserDetails 에서 UserEntity 생성
     public UserEntity newEntity() {
         UserEntity entity = new UserEntity();
         entity.setUsername(username);
