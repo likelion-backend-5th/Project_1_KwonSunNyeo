@@ -1,6 +1,7 @@
 package com.likelion.market.jwt;
 
 import com.likelion.market.domain.CustomUserDetails;
+import com.likelion.market.entity.Role;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,11 +48,22 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 String username = jwtTokenUtils
                         .parseClaims(token)
                         .getSubject();
+                // JWT 에서 권한 가져오기
+                String roleString = jwtTokenUtils
+                        .parseClaims(token)
+                        .get("role", String.class);
+                Role role;
+                if (roleString != null) {
+                    role = Role.valueOf(roleString);
+                } else {
+                    role = Role.USER;
+                }
                 // 사용자 인증 정보 생성
                 AbstractAuthenticationToken authenticationToken
                         = new UsernamePasswordAuthenticationToken(
                         CustomUserDetails.builder()
                                 .username(username)
+                                .role(role)
                                 .build(),
                         token, new ArrayList<>()
                 );
