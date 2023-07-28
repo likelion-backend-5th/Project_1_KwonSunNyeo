@@ -16,10 +16,9 @@ public class ProposalDto {
     public static ProposalDto fromEntity(ProposalEntity entity) {
         ProposalDto dto = new ProposalDto();
         dto.setId(entity.getId());
-        dto.setItemId(entity.getItemId());
+        dto.setItemId(entity.getItem().getId());
         dto.setSuggestedPrice(entity.getSuggestedPrice());
-        dto.setWriter(entity.getWriter());
-        dto.setPassword(entity.getPassword());
+        dto.setWriter(entity.getUser().getUsername());
         dto.setStatus(entity.getStatus());
         return dto;
     }

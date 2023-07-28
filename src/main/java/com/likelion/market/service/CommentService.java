@@ -4,8 +4,10 @@ import com.likelion.market.dto.CommentDto;
 import com.likelion.market.dto.CommentPageDto;
 import com.likelion.market.entity.CommentEntity;
 import com.likelion.market.entity.ItemEntity;
+import com.likelion.market.entity.UserEntity;
 import com.likelion.market.repository.CommentRepository;
 import com.likelion.market.repository.ItemRepository;
+import com.likelion.market.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,15 +24,15 @@ import java.util.Optional;
 public class CommentService {
     private final ItemRepository itemRepository;
     private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
 
     // 물품 댓글 - 등록
     public CommentDto createComment(Long itemId, CommentDto dto) {
-        if (!itemRepository.existsById(itemId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        ItemEntity item = itemRepository.findById(itemId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        UserEntity user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         CommentEntity newComment = new CommentEntity();
-        newComment.setItemId(itemId);
-        newComment.setWriter(dto.getWriter());
+        newComment.setItem(item);
+        newComment.setUser(user);
         newComment.setPassword(dto.getPassword());
         newComment.setContent(dto.getContent());
         commentRepository.save(newComment);
@@ -56,14 +58,14 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         CommentEntity comment = optionalComment.get();
-        if (!itemId.equals(comment.getItemId())) {
+        if (!itemId.equals(comment.getItem().getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         if (!comment.getPassword().equals(dto.getPassword())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "댓글을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
         }
         comment.setContent(dto.getContent());
-        comment.setWriter(dto.getWriter());
+        comment.setUser(userRepository.findById(dto.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
         commentRepository.save(comment);
         return CommentDto.fromEntity(comment);
     }
@@ -79,7 +81,7 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         CommentEntity comment = optionalComment.get();
-        if (!itemId.equals(comment.getItemId())) {
+        if (!itemId.equals(comment.getItem().getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         if (!optionalItem.get().getPassword().equals(dto.getPassword())) {
@@ -97,10 +99,11 @@ public class CommentService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         CommentEntity comment = optionalComment.get();
-        if (!itemId.equals(comment.getItemId())) {
+        if (!itemId.equals(comment.getItem().getId())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        if (!comment.getWriter().equals(dto.getWriter())) {
+        UserEntity user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!comment.getUser().equals(user)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "댓글을 등록한 작성자가 일치하지 않습니다.");
         }
         if (!comment.getPassword().equals(dto.getPassword())) {

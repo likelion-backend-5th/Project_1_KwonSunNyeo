@@ -10,9 +10,19 @@ public class ProposalEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long itemId;
+
+    // 제안은 한 상품에서 나올 수 있다.
+    @ManyToOne
+    @JoinColumn(name = "item_id")
+    private ItemEntity item;
+
     private int suggestedPrice;
-    private String writer;
+
+    // 제안은 한 사용자에게 나올 수 있다.
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
     private String password;
 
     @Enumerated(EnumType.STRING)

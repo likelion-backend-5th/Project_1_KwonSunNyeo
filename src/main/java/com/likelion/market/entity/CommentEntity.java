@@ -10,8 +10,17 @@ public class CommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long itemId;
-    private String writer;
+
+    // 댓글은 한 상품에서 나올 수 있다.
+    @ManyToOne
+    @JoinColumn(name = "item_id")
+    private ItemEntity item;
+
+    // 댓글은 한 사용자에게 나올 수 있다.
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
     private String password;
     private String content;
     private String reply;
