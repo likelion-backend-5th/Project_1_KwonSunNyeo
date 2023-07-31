@@ -89,6 +89,7 @@ public class CustomUserDetails implements UserDetails {
         entity.setPhone(phone);
         entity.setEmail(email);
         entity.setAddress(address);
+        entity.setRole(role);
         return entity;
     }
 

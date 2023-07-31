@@ -32,7 +32,7 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // 인증 설정
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/no-auth", "/token/issue", "/error", "/items/**")
+                        .requestMatchers("/no-auth", "/token/issue", "/error", "/items/**", "/users/login", "/users/register")
                         .permitAll() // 모든 사용자 접근 가능
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN") // ADMIN 권한을 가진 사용자만 접근 가능
