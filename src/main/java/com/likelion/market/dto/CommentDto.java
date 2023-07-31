@@ -1,6 +1,8 @@
 package com.likelion.market.dto;
 
 import com.likelion.market.entity.CommentEntity;
+import com.likelion.market.entity.ItemEntity;
+import com.likelion.market.entity.UserEntity;
 import lombok.Data;
 
 @Data
@@ -23,8 +25,10 @@ public class CommentDto {
         return dto;
     }
 
-    public CommentEntity newEntity() {
+    public CommentEntity newEntity(UserEntity user, ItemEntity item) {
         CommentEntity entity = new CommentEntity();
+        entity.setUser(user);
+        entity.setItem(item);
         entity.setPassword(password);
         entity.setContent(content);
         entity.setReply(reply);

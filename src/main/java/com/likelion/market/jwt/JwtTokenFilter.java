@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -59,19 +62,20 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     role = Role.USER;
                 }
                 // 사용자 인증 정보 생성
+                List<GrantedAuthority> authorities = new ArrayList<>();
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
                 AbstractAuthenticationToken authenticationToken
                         = new UsernamePasswordAuthenticationToken(
                         CustomUserDetails.builder()
                                 .username(username)
                                 .role(role)
                                 .build(),
-                        token, new ArrayList<>()
+                        token, authorities
                 );
                 // SecurityContext 에 사용자 정보 설정
                 context.setAuthentication(authenticationToken);
                 // SecurityContextHolder 에 SecurityContext 설정
                 SecurityContextHolder.setContext(context);
-                log.info("set security context with jwt");
             }
             else {
                 log.warn("jwt validation failed");

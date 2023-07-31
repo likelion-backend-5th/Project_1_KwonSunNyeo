@@ -11,8 +11,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProposalRepository extends JpaRepository<ProposalEntity, Long> {
-    Page<ProposalEntity> findByItemIdAndUser_UsernameAndPassword(
-            Long itemId, String username, String password, Pageable pageable);
-    List<ProposalEntity> findAllByItemIdAndStatus(Long itemId, ProposalStatus status);
-    Optional<ProposalEntity> findByIdAndUser(Long id, UserEntity user);
+    Page<ProposalEntity> findByItemId(Long itemId, Pageable pageable);
 }

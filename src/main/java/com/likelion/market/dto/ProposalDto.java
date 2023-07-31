@@ -8,6 +8,7 @@ import lombok.Data;
 public class ProposalDto {
     private Long id;
     private Long itemId;
+    private Long userId;
     private int suggestedPrice;
     private String writer;
     private String password;
@@ -17,6 +18,7 @@ public class ProposalDto {
         ProposalDto dto = new ProposalDto();
         dto.setId(entity.getId());
         dto.setItemId(entity.getItem().getId());
+        dto.setUserId(entity.getUser().getId());
         dto.setSuggestedPrice(entity.getSuggestedPrice());
         dto.setWriter(entity.getUser().getUsername());
         dto.setStatus(entity.getStatus());

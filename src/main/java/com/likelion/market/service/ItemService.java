@@ -38,7 +38,7 @@ public class ItemService {
         }
         UserEntity user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         ItemEntity item = dto.newEntity(user);
-
+        item.setUser(user);
         itemRepository.save(item);
         return ItemDto.fromEntity(item);
     }
@@ -71,14 +71,12 @@ public class ItemService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         ItemEntity item = optionalItem.get();
-        UserEntity user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        if (!item.getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
+        Optional<UserEntity> optionalUser = userRepository.findById(dto.getUserId());
+        if (optionalUser.isEmpty() || !item.getUser().equals(optionalUser.get())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
         }
         item.setTitle(dto.getTitle());
         item.setDescription(dto.getDescription());
-        item.setUser(user);
-        item.setPassword(dto.getPassword());
         item.setStatus(dto.getStatus());
         item.setMinPriceWanted(dto.getMinPriceWanted());
         itemRepository.save(item);
@@ -86,14 +84,14 @@ public class ItemService {
     }
 
     // 물품 정보 - 수정 - 이미지
-    public ItemDto updateItemImage(Long id, MultipartFile itemImage, String password) {
+    public ItemDto updateItemImage(Long id, MultipartFile itemImage, UserEntity requestUser) {
         Optional<ItemEntity> optionalItem = itemRepository.findById(id);
         if (optionalItem.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         ItemEntity item = optionalItem.get();
-        if (!item.getPassword().equals(password)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
+        if (!item.getUser().equals(requestUser)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
         }
         // 폴더만 생성
         String imageDir = String.format("image/%d/", id);
@@ -138,19 +136,15 @@ public class ItemService {
     }
 
     // 물품 정보 - 삭제
-    public void deleteItem(Long id, ItemDto dto) {
+    public void deleteItem(Long id, UserEntity requestUser) {
         Optional<ItemEntity> optionalItem = itemRepository.findById(id);
-        if (optionalItem.isPresent()) {
-            ItemEntity item = optionalItem.get();
-            UserEntity user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-            if (!item.getUser().equals(user)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
-            }
-            if (!item.getPassword().equals(dto.getPassword())) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
-            }
-            itemRepository.deleteById(id);
+        if (optionalItem.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        ItemEntity item = optionalItem.get();
+        if (!item.getUser().equals(requestUser)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
+        }
+        itemRepository.deleteById(id);
     }
 }
