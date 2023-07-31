@@ -1,9 +1,8 @@
 package com.likelion.market.controller;
 
-import com.likelion.market.dto.MessageResponseDto;
+import com.likelion.market.dto.ResponseDto;
 import com.likelion.market.dto.ProposalDto;
 import com.likelion.market.dto.ProposalPageDto;
-import com.likelion.market.dto.ResponseDto;
 import com.likelion.market.entity.UserEntity;
 import com.likelion.market.repository.UserRepository;
 import com.likelion.market.service.ProposalService;
@@ -47,13 +46,11 @@ public class ProposalController {
                 service.createProposal(itemId, dto);
                 ResponseDto response = new ResponseDto();
                 response.setMessage("구매 제안이 등록되었습니다.");
-                response.setStatus(200);
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
         ResponseDto response = new ResponseDto();
         response.setMessage("작성자 정보를 찾을 수 없습니다.");
-        response.setStatus(400);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -70,7 +67,7 @@ public class ProposalController {
     // 구매 제안 - 수정 - 가격
     // PUT /items/{itemId}/proposals/{proposalId}/price
     @PutMapping("/{proposalId}/price")
-    public ResponseEntity<MessageResponseDto> update(
+    public ResponseEntity<ResponseDto> update(
             @PathVariable("itemId") Long itemId,
             @PathVariable("proposalId") Long proposalId,
             @RequestBody ProposalDto dto
@@ -85,12 +82,12 @@ public class ProposalController {
                 dto.setItemId(itemId);
                 dto.setId(proposalId);
                 service.updateProposalPrice(proposalId, dto);
-                MessageResponseDto response = new MessageResponseDto();
+                ResponseDto response = new ResponseDto();
                 response.setMessage("제안이 수정되었습니다.");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
-        MessageResponseDto response = new MessageResponseDto();
+        ResponseDto response = new ResponseDto();
         response.setMessage("작성자 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
@@ -98,7 +95,7 @@ public class ProposalController {
     // 구매 제안 - 수정 - 상태
     // PUT /items/{itemId}/proposals/{proposalId}/status
     @PutMapping("/{proposalId}/status")
-    public ResponseEntity<MessageResponseDto> updateStatus(
+    public ResponseEntity<ResponseDto> updateStatus(
             @PathVariable("itemId") Long itemId,
             @PathVariable("proposalId") Long proposalId,
             @RequestBody ProposalDto dto
@@ -113,12 +110,12 @@ public class ProposalController {
                 dto.setItemId(itemId);
                 dto.setId(proposalId);
                 service.updateProposalStatus(proposalId, dto);
-                MessageResponseDto response = new MessageResponseDto();
+                ResponseDto response = new ResponseDto();
                 response.setMessage("제안의 상태가 변경되었습니다.");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
-        MessageResponseDto response = new MessageResponseDto();
+        ResponseDto response = new ResponseDto();
         response.setMessage("작성자 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
@@ -126,7 +123,7 @@ public class ProposalController {
     // 물품 정보, 구매 제안 - 수정 - 상태
     // PUT /items/{itemId}/proposals/{proposalId}/confirm
     @PutMapping("/{proposalId}/confirm")
-    public ResponseEntity<MessageResponseDto> confirmProposal(
+    public ResponseEntity<ResponseDto> confirmProposal(
             @PathVariable Long itemId,
             @PathVariable Long proposalId,
             @RequestBody ProposalDto dto
@@ -138,12 +135,12 @@ public class ProposalController {
             if (userOptional.isPresent()) {
                 UserEntity user = userOptional.get();
                 service.confirmProposal(itemId, proposalId, user.getId());
-                MessageResponseDto response = new MessageResponseDto();
+                ResponseDto response = new ResponseDto();
                 response.setMessage("구매가 확정되었습니다.");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
-        MessageResponseDto response = new MessageResponseDto();
+        ResponseDto response = new ResponseDto();
         response.setMessage("작성자 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
@@ -151,7 +148,7 @@ public class ProposalController {
     // 구매 제안 - 삭제
     // DELETE /items/{itemId}/proposals/{proposalId}
     @DeleteMapping("/{proposalId}")
-    public ResponseEntity<MessageResponseDto> delete(
+    public ResponseEntity<ResponseDto> delete(
             @PathVariable("itemId") Long itemId,
             @PathVariable("proposalId") Long proposalId,
             @RequestBody ProposalDto dto
@@ -163,12 +160,12 @@ public class ProposalController {
             if (userOptional.isPresent()) {
                 UserEntity user = userOptional.get();
                 service.deleteProposal(proposalId, user.getId());
-                MessageResponseDto response = new MessageResponseDto();
-                response.setMessage("제안을 삭제했습니다.");
+                ResponseDto response = new ResponseDto();
+                response.setMessage("제안이 삭제되었습니다.");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
-        MessageResponseDto response = new MessageResponseDto();
+        ResponseDto response = new ResponseDto();
         response.setMessage("작성자 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
