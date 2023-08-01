@@ -6,6 +6,7 @@ import com.likelion.market.dto.ProposalPageDto;
 import com.likelion.market.entity.UserEntity;
 import com.likelion.market.repository.UserRepository;
 import com.likelion.market.service.ProposalService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ public class ProposalController {
     @PostMapping
     public ResponseEntity<ResponseDto> create(
             @PathVariable("itemId") Long itemId,
-            @RequestBody ProposalDto dto
+            @Valid @RequestBody ProposalDto dto
     ) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
@@ -50,7 +51,7 @@ public class ProposalController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -70,7 +71,7 @@ public class ProposalController {
     public ResponseEntity<ResponseDto> update(
             @PathVariable("itemId") Long itemId,
             @PathVariable("proposalId") Long proposalId,
-            @RequestBody ProposalDto dto
+            @Valid @RequestBody ProposalDto dto
     ) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
@@ -88,7 +89,7 @@ public class ProposalController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -116,7 +117,7 @@ public class ProposalController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -141,7 +142,7 @@ public class ProposalController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -150,8 +151,7 @@ public class ProposalController {
     @DeleteMapping("/{proposalId}")
     public ResponseEntity<ResponseDto> delete(
             @PathVariable("itemId") Long itemId,
-            @PathVariable("proposalId") Long proposalId,
-            @RequestBody ProposalDto dto
+            @PathVariable("proposalId") Long proposalId
     ) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
@@ -166,7 +166,7 @@ public class ProposalController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

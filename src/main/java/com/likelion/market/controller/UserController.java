@@ -6,6 +6,7 @@ import com.likelion.market.dto.UserDto;
 import com.likelion.market.jwt.JwtRequestDto;
 import com.likelion.market.jwt.JwtTokenDto;
 import com.likelion.market.jwt.JwtTokenUtils;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,28 +70,27 @@ public class UserController {
     // 회원가입 요청 처리
     @PostMapping("/register")
     public ResponseEntity<ResponseDto> register(
-            @RequestBody UserDto userDto
+            @Valid @RequestBody UserDto userDto
     ) {
-        if(userDto.getUsername().trim().isEmpty() || userDto.getPassword().trim().isEmpty()) {
-            ResponseDto response = new ResponseDto();
-            response.setMessage("아이디와 비밀번호는 필수값입니다.");
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-        }
         try {
+            if(manager.userExists(userDto.getUsername())) {
+                ResponseDto response = new ResponseDto();
+                response.setMessage("이미 존재하는 아이디입니다.");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
+            if(!userDto.getPassword().equals(userDto.getPasswordCheck())){
+                ResponseDto response = new ResponseDto();
+                response.setMessage("비밀번호가 일치하지 않습니다.");
+                return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+            }
             CustomUserDetails userDetails = userDto.toCustomUserDetails(passwordEncoder);
             manager.createUser(userDetails);
             ResponseDto response = new ResponseDto();
             response.setMessage("회원가입이 완료되었습니다.");
             return new ResponseEntity<>(response, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            log.warn("password does not match...");
-            ResponseDto response = new ResponseDto();
-            response.setMessage("비밀번호가 일치하지 않습니다.");
-            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            log.error("Failed to register user", e);
             ResponseDto response = new ResponseDto();
-            response.setMessage("Failed to register user");
+            response.setMessage("회원가입이 실패되었습니다.");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -101,10 +101,22 @@ public class UserController {
             @RequestBody JwtRequestDto requestDto
     ) {
         try {
-            UserDetails userDetails = manager.loadUserByUsername(requestDto.getUsername());
+            if (requestDto.getUsername().trim().isEmpty() || requestDto.getPassword().trim().isEmpty()) {
+                ResponseDto response = new ResponseDto();
+                response.setMessage("사용자 정보를 찾을 수 없습니다.");
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            }
+            UserDetails userDetails = null;
+            try {
+                userDetails = manager.loadUserByUsername(requestDto.getUsername());
+            } catch (UsernameNotFoundException e) {
+                ResponseDto response = new ResponseDto();
+                response.setMessage("사용자 정보를 찾을 수 없습니다.");
+                return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+            }
             if (!passwordEncoder.matches(requestDto.getPassword(), userDetails.getPassword())) {
                 ResponseDto response = new ResponseDto();
-                response.setMessage("아이디 혹은 비밀번호가 일치하지 않습니다.");
+                response.setMessage("비밀번호가 일치하지 않습니다.");
                 return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
             }
             JwtTokenDto jwtToken = new JwtTokenDto();
@@ -112,17 +124,17 @@ public class UserController {
             ResponseDto response = new ResponseDto();
             response.setMessage("로그인 되었습니다. 토큰은 " + jwtToken.getToken() + " 입니다.");
             return ResponseEntity.ok(response);
-        } catch (UsernameNotFoundException e) {
+        } catch (Exception e) {
             ResponseDto response = new ResponseDto();
-            response.setMessage("사용자 정보를 찾을 수 없습니다.");
+            response.setMessage("로그인이 실패되었습니다.");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
         }
     }
 
     // 인증이 필요한 URL
     // 사용자가 정상적으로 인증된 경우에만 접근 가능
-    @PostMapping("/secured")
-    public ResponseEntity<ResponseDto> checkSecure() {
+    @PostMapping("/check")
+    public ResponseEntity<ResponseDto> check() {
         log.info(SecurityContextHolder.getContext().getAuthentication().getName());
         ResponseDto response = new ResponseDto();
         response.setMessage("인증되었습니다.");

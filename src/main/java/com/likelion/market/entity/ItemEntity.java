@@ -14,7 +14,7 @@ public class ItemEntity {
     private Long id;
     private String title;
     private String description;
-    private int minPriceWanted;
+    private Integer minPriceWanted;
     private String imageUrl;
 
     // 상품은 한 사용자에게 속할 수 있다.

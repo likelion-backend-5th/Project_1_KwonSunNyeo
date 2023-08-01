@@ -34,9 +34,10 @@ public class ItemService {
     // 물품 정보 - 등록
     public ItemDto createItem(ItemDto dto) {
         if (dto.getUserId() == null || !userRepository.existsById(dto.getUserId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user ID");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효하지 않은 사용자입니다.");
         }
-        UserEntity user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        UserEntity user = userRepository.findById(dto.getUserId()).
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 사용자를 찾을 수 없습니다."));
         ItemEntity item = dto.newEntity(user);
         item.setUser(user);
         itemRepository.save(item);
@@ -49,7 +50,7 @@ public class ItemService {
         if (optionalItem.isPresent()) {
             return ItemReadDto.fromEntity(optionalItem.get());
         }
-        else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 물품을 찾을 수 없습니다.");
     }
 
     // 물품 정보 - 페이지 단위 조회
@@ -68,12 +69,12 @@ public class ItemService {
     public ItemDto updateItem(Long id, ItemDto dto) {
         Optional<ItemEntity> optionalItem = itemRepository.findById(id);
         if (optionalItem.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 물품을 찾을 수 없습니다.");
         }
         ItemEntity item = optionalItem.get();
         Optional<UserEntity> optionalUser = userRepository.findById(dto.getUserId());
         if (optionalUser.isEmpty() || !item.getUser().equals(optionalUser.get())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 정보가 일치하지 않습니다.");
         }
         item.setTitle(dto.getTitle());
         item.setDescription(dto.getDescription());
@@ -87,11 +88,11 @@ public class ItemService {
     public ItemDto updateItemImage(Long id, MultipartFile itemImage, UserEntity requestUser) {
         Optional<ItemEntity> optionalItem = itemRepository.findById(id);
         if (optionalItem.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 물품을 찾을 수 없습니다.");
         }
         ItemEntity item = optionalItem.get();
         if (!item.getUser().equals(requestUser)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 정보가 일치하지 않습니다.");
         }
         // 폴더만 생성
         String imageDir = String.format("image/%d/", id);
@@ -128,7 +129,7 @@ public class ItemService {
     public void updateItemStatus(Long itemId, ItemStatus status) {
         Optional<ItemEntity> optionalItem = itemRepository.findById(itemId);
         if (optionalItem.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 물품을 찾을 수 없습니다.");
         }
         ItemEntity item = optionalItem.get();
         item.setStatus(status);
@@ -139,11 +140,11 @@ public class ItemService {
     public void deleteItem(Long id, UserEntity requestUser) {
         Optional<ItemEntity> optionalItem = itemRepository.findById(id);
         if (optionalItem.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 물품을 찾을 수 없습니다.");
         }
         ItemEntity item = optionalItem.get();
         if (!item.getUser().equals(requestUser)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 정보가 일치하지 않습니다.");
         }
         itemRepository.deleteById(id);
     }

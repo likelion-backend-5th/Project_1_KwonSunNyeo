@@ -6,6 +6,7 @@ import com.likelion.market.dto.ResponseDto;
 import com.likelion.market.entity.UserEntity;
 import com.likelion.market.repository.UserRepository;
 import com.likelion.market.service.CommentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<ResponseDto> create(
             @PathVariable("itemId") Long itemId,
-            @RequestBody CommentDto dto
+            @Valid @RequestBody CommentDto dto
     ) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
@@ -50,7 +51,7 @@ public class CommentController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -88,7 +89,7 @@ public class CommentController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -116,7 +117,7 @@ public class CommentController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -125,8 +126,7 @@ public class CommentController {
     @DeleteMapping("/{commentId}")
     public ResponseEntity<ResponseDto> delete(
             @PathVariable("itemId") Long itemId,
-            @PathVariable("commentId") Long commentId,
-            @RequestBody CommentDto dto
+            @PathVariable("commentId") Long commentId
     ) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
@@ -134,17 +134,14 @@ public class CommentController {
             Optional<UserEntity> userOptional = userRepository.findByUsername(username);
             if (userOptional.isPresent()) {
                 UserEntity user = userOptional.get();
-                dto.setUserId(user.getId());
-                dto.setItemId(itemId);
-                dto.setId(commentId);
-                service.deleteComment(itemId, commentId, dto);
+                service.deleteComment(itemId, commentId, user.getId());
                 ResponseDto response = new ResponseDto();
                 response.setMessage("댓글이 삭제되었습니다.");
                 return new ResponseEntity<>(response, HttpStatus.OK);
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

@@ -4,6 +4,7 @@ import com.likelion.market.dto.*;
 import com.likelion.market.entity.UserEntity;
 import com.likelion.market.repository.UserRepository;
 import com.likelion.market.service.ItemService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,7 +30,7 @@ public class ItemController {
     // POST /items
     @PostMapping
     public ResponseEntity<ResponseDto> create(
-            @RequestBody ItemDto dto
+            @Valid @RequestBody ItemDto dto
     ) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
@@ -45,7 +46,7 @@ public class ItemController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -88,7 +89,7 @@ public class ItemController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -115,7 +116,7 @@ public class ItemController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -123,8 +124,7 @@ public class ItemController {
     // DELETE /items/{itemId}
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseDto> delete(
-            @PathVariable("id") Long id,
-            @RequestBody ItemDto dto
+            @PathVariable("id") Long id
     ) {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserDetails) {
@@ -139,7 +139,7 @@ public class ItemController {
             }
         }
         ResponseDto response = new ResponseDto();
-        response.setMessage("작성자 정보를 찾을 수 없습니다.");
+        response.setMessage("작성자의 정보를 찾을 수 없습니다.");
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }
