@@ -59,8 +59,7 @@
       dataType: 'json',
       success: function(data) {
         console.log(data); // 서버에서 보내는 응답 전체 출력
-        var message = data.message;
-        var token = message.split(' ')[3]; // '로그인 되었습니다. 토큰은 {토큰 값} 입니다.'에서 {토큰 값} 추출
+        var token = data.token;
         console.log(token); // 토큰 값 출력
         if (token) {
           // 토큰이 존재하면 로컬 스토리지에 저장하고 my-profile 로 리다이렉션

@@ -122,10 +122,9 @@ public class UserController {
                 response.setMessage("비밀번호가 일치하지 않습니다.");
                 return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
             }
-            JwtTokenDto jwtToken = new JwtTokenDto();
-            jwtToken.setToken(jwtTokenUtils.generateToken(userDetails));
-            ResponseDto response = new ResponseDto();
-            response.setMessage("로그인 되었습니다. 토큰은 " + jwtToken.getToken() + " 입니다.");
+            JwtTokenDto response = new JwtTokenDto();
+            response.setToken(jwtTokenUtils.generateToken(userDetails));
+            response.setMessage("로그인 되었습니다.");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             ResponseDto response = new ResponseDto();
