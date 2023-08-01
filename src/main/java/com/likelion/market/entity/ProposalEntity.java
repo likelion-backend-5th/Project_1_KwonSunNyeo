@@ -27,4 +27,12 @@ public class ProposalEntity {
 
     @Enumerated(EnumType.STRING)
     private ProposalStatus status;
+
+    public void updatePrice(Integer suggestedPrice) {
+        this.suggestedPrice = suggestedPrice;
+    }
+
+    public void updateStatus(ProposalStatus status) {
+        this.status = status;
+    }
 }

@@ -82,7 +82,7 @@ public class ProposalController {
                 dto.setUserId(user.getId());
                 dto.setItemId(itemId);
                 dto.setId(proposalId);
-                service.updateProposalPrice(proposalId, dto);
+                service.updateProposalPrice(proposalId, user.getId(), dto.getSuggestedPrice());
                 ResponseDto response = new ResponseDto();
                 response.setMessage("제안이 수정되었습니다.");
                 return new ResponseEntity<>(response, HttpStatus.OK);
@@ -110,7 +110,7 @@ public class ProposalController {
                 dto.setUserId(user.getId());
                 dto.setItemId(itemId);
                 dto.setId(proposalId);
-                service.updateProposalStatus(proposalId, dto);
+                service.updateProposalStatus(proposalId, user.getId(), dto.getStatus());
                 ResponseDto response = new ResponseDto();
                 response.setMessage("제안의 상태가 변경되었습니다.");
                 return new ResponseEntity<>(response, HttpStatus.OK);

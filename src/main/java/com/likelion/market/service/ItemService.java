@@ -31,13 +31,18 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
+    private static final String INVALID_USER = "유효하지 않은 사용자입니다.";
+    private static final String NOT_FOUND_ITEM = "해당 물품을 찾을 수 없습니다.";
+    private static final String NOT_FOUND_USER = "해당 사용자를 찾을 수 없습니다.";
+    private static final String UNAUTHORIZED_USER = "물품을 등록한 작성자의 정보가 일치하지 않습니다.";
+
     // 물품 정보 - 등록
     public ItemDto createItem(ItemDto dto) {
         if (dto.getUserId() == null || !userRepository.existsById(dto.getUserId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "유효하지 않은 사용자입니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_USER);
         }
-        UserEntity user = userRepository.findById(dto.getUserId()).
-                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 사용자를 찾을 수 없습니다."));
+        UserEntity user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_USER));
         ItemEntity item = dto.newEntity(user);
         item.setUser(user);
         itemRepository.save(item);
@@ -46,53 +51,38 @@ public class ItemService {
 
     // 물품 정보 - 단일 조회
     public ItemReadDto readItem(Long id) {
-        Optional<ItemEntity> optionalItem = itemRepository.findById(id);
-        if (optionalItem.isPresent()) {
-            return ItemReadDto.fromEntity(optionalItem.get());
-        }
-        else throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 물품을 찾을 수 없습니다.");
+        ItemEntity item = itemRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_ITEM));
+        return ItemReadDto.fromEntity(item);
     }
 
     // 물품 정보 - 페이지 단위 조회
-    public Page<ItemPageDto> readItemPaged(
-            Integer page, Integer limit
-    ) {
-        Pageable pageable = PageRequest.of(
-                page, limit, Sort.by("id").descending()
-        );
+    public Page<ItemPageDto> readItemPaged(Integer page, Integer limit) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("id").descending());
         Page<ItemEntity> itemEntityPage = itemRepository.findAll(pageable);
-        Page<ItemPageDto> itemPageDtoPage = itemEntityPage.map(ItemPageDto::fromEntity);
-        return itemPageDtoPage;
+        return itemEntityPage.map(ItemPageDto::fromEntity);
     }
 
     // 물품 정보 - 수정
     public ItemDto updateItem(Long id, ItemDto dto) {
-        Optional<ItemEntity> optionalItem = itemRepository.findById(id);
-        if (optionalItem.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 물품을 찾을 수 없습니다.");
+        ItemEntity item = itemRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_ITEM));
+        UserEntity user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_USER));
+        if (!item.getUser().equals(user)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_USER);
         }
-        ItemEntity item = optionalItem.get();
-        Optional<UserEntity> optionalUser = userRepository.findById(dto.getUserId());
-        if (optionalUser.isEmpty() || !item.getUser().equals(optionalUser.get())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 정보가 일치하지 않습니다.");
-        }
-        item.setTitle(dto.getTitle());
-        item.setDescription(dto.getDescription());
-        item.setStatus(dto.getStatus());
-        item.setMinPriceWanted(dto.getMinPriceWanted());
+        item.update(dto);
         itemRepository.save(item);
         return ItemDto.fromEntity(item);
     }
 
     // 물품 정보 - 수정 - 이미지
     public ItemDto updateItemImage(Long id, MultipartFile itemImage, UserEntity requestUser) {
-        Optional<ItemEntity> optionalItem = itemRepository.findById(id);
-        if (optionalItem.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 물품을 찾을 수 없습니다.");
-        }
-        ItemEntity item = optionalItem.get();
+        ItemEntity item = itemRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_ITEM));
         if (!item.getUser().equals(requestUser)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 정보가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_USER);
         }
         // 폴더만 생성
         String imageDir = String.format("image/%d/", id);
@@ -127,24 +117,18 @@ public class ItemService {
 
     // 물품 정보 - 수정 - 상태
     public void updateItemStatus(Long itemId, ItemStatus status) {
-        Optional<ItemEntity> optionalItem = itemRepository.findById(itemId);
-        if (optionalItem.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 물품을 찾을 수 없습니다.");
-        }
-        ItemEntity item = optionalItem.get();
+        ItemEntity item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_ITEM));
         item.setStatus(status);
         itemRepository.save(item);
     }
 
     // 물품 정보 - 삭제
     public void deleteItem(Long id, UserEntity requestUser) {
-        Optional<ItemEntity> optionalItem = itemRepository.findById(id);
-        if (optionalItem.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 물품을 찾을 수 없습니다.");
-        }
-        ItemEntity item = optionalItem.get();
+        ItemEntity item = itemRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_ITEM));
         if (!item.getUser().equals(requestUser)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 정보가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_USER);
         }
         itemRepository.deleteById(id);
     }
