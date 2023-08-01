@@ -1,5 +1,6 @@
 package com.likelion.market.entity;
 
+import com.likelion.market.dto.CommentDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -24,4 +25,8 @@ public class CommentEntity {
     private String password;
     private String content;
     private String reply;
+
+    public void update(CommentDto dto) {
+        this.content = dto.getContent();
+    }
 }

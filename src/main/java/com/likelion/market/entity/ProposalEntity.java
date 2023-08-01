@@ -16,7 +16,7 @@ public class ProposalEntity {
     @JoinColumn(name = "item_id")
     private ItemEntity item;
 
-    private int suggestedPrice;
+    private Integer suggestedPrice;
 
     // 제안은 한 사용자에게 나올 수 있다.
     @ManyToOne
@@ -27,4 +27,12 @@ public class ProposalEntity {
 
     @Enumerated(EnumType.STRING)
     private ProposalStatus status;
+
+    public void updatePrice(Integer suggestedPrice) {
+        this.suggestedPrice = suggestedPrice;
+    }
+
+    public void updateStatus(ProposalStatus status) {
+        this.status = status;
+    }
 }

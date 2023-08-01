@@ -2,7 +2,10 @@ package com.likelion.market.service;
 
 import com.likelion.market.dto.ProposalDto;
 import com.likelion.market.dto.ProposalPageDto;
-import com.likelion.market.entity.*;
+import com.likelion.market.entity.ItemEntity;
+import com.likelion.market.entity.ProposalEntity;
+import com.likelion.market.entity.ProposalStatus;
+import com.likelion.market.entity.UserEntity;
 import com.likelion.market.repository.ItemRepository;
 import com.likelion.market.repository.ProposalRepository;
 import com.likelion.market.repository.UserRepository;
@@ -15,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,15 +28,18 @@ public class ProposalService {
     private final UserRepository userRepository;
     private final ItemService itemService;
 
+    private static final String NOT_FOUND_ITEM = "해당 물품을 찾을 수 없습니다.";
+    private static final String NOT_FOUND_USER = "해당 사용자를 찾을 수 없습니다.";
+    private static final String NOT_FOUND_PROPOSAL = "해당 제안을 찾을 수 없습니다.";
+    private static final String UNAUTHORIZED_USER = "구매를 제안한 작성자의 정보가 일치하지 않습니다.";
+    private static final String NOT_ACCEPTED_STATUS = "제안이 수락 상태가 아니면 확정할 수 없습니다.";
+
     // 구매 제안 - 등록
-    public ProposalDto createProposal(Long itemId, String writer, String password, ProposalDto dto) {
-        UserEntity user = userRepository.findByUsername(writer)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
-        if (!user.getPassword().equals(password)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "비밀번호가 일치하지 않습니다.");
-        }
+    public ProposalDto createProposal(Long itemId, ProposalDto dto) {
         ItemEntity item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "물품을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_ITEM));
+        UserEntity user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_USER));
         ProposalEntity newProposal = new ProposalEntity();
         newProposal.setItem(item);
         newProposal.setUser(user);
@@ -45,90 +50,58 @@ public class ProposalService {
     }
 
     // 구매 제안 - 페이지 단위 조회
-    public Page<ProposalPageDto> readProposalPaged(
-            Long itemId, String writer, String password, Integer pageNumber, Integer pageSize
-    ) {
-        Pageable pageable = PageRequest.of(
-                pageNumber, pageSize, Sort.by("id").descending()
-        );
-        Page<ProposalEntity> proposalEntityPage = proposalRepository.findByItemIdAndUser_UsernameAndPassword(itemId, writer, password, pageable);
-        Page<ProposalPageDto> proposalPageDtoPage = proposalEntityPage.map(ProposalPageDto::fromEntity);
-        return proposalPageDtoPage;
+    public Page<ProposalPageDto> readProposalPaged(Long itemId, Integer page, Integer limit) {
+        Pageable pageable = PageRequest.of(page, limit, Sort.by("id").descending());
+        Page<ProposalEntity> proposalEntityPage = proposalRepository.findByItemId(itemId, pageable);
+        return proposalEntityPage.map(ProposalPageDto::fromEntity);
     }
 
     // 구매 제안 - 수정 - 가격
-    public ProposalDto updateProposalPrice(Long proposalId, String writer, String password, int suggestedPrice) {
-        UserEntity user = userRepository.findByUsername(writer)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
-        if (!user.getPassword().equals(password)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
-        }
+    public ProposalDto updateProposalPrice(Long proposalId, Long userId, Integer suggestedPrice) {
         ProposalEntity proposal = proposalRepository.findById(proposalId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "제안을 찾을 수 없습니다."));
-        proposal.setSuggestedPrice(suggestedPrice);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_PROPOSAL));
+        if (!proposal.getUser().getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_USER);
+        }
+        proposal.updatePrice(suggestedPrice);
         proposalRepository.save(proposal);
         return ProposalDto.fromEntity(proposal);
     }
 
     // 구매 제안 - 수정 - 상태
-    public ProposalDto updateProposalStatus(Long itemId, Long proposalId, ProposalDto dto) {
-        Optional<ItemEntity> optionalItem = itemRepository.findById(itemId);
-        if (optionalItem.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    public ProposalDto updateProposalStatus(Long proposalId, Long userId, ProposalStatus status) {
+        ProposalEntity proposal = proposalRepository.findById(proposalId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_PROPOSAL));
+        if (!proposal.getUser().getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_USER);
         }
-        ItemEntity item = optionalItem.get();
-        Optional<ProposalEntity> optionalProposal = proposalRepository.findById(proposalId);
-        if (optionalProposal.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        ProposalEntity proposal = optionalProposal.get();
-        if (!item.getUser().getUsername().equals(dto.getWriter())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자가 일치하지 않습니다.");
-        }
-        if (!item.getUser().getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
-        }
-        proposal.setStatus(dto.getStatus());
+        proposal.updateStatus(status);
         proposalRepository.save(proposal);
         return ProposalDto.fromEntity(proposal);
     }
 
     // 물품 정보, 구매 제안 - 수정 - 상태
-    public ProposalDto confirmProposal(Long itemId, Long proposalId, ProposalDto dto) {
-        Optional<ProposalEntity> optionalProposal = proposalRepository.findById(proposalId);
-        if (optionalProposal.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        ProposalEntity proposal = optionalProposal.get();
-        if (!proposal.getUser().getUsername().equals(dto.getWriter())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "구매를 제안한 작성자가 일치하지 않습니다.");
-        }
-        if (!proposal.getUser().getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "구매를 제안한 작성자의 비밀번호가 일치하지 않습니다.");
+    public ProposalDto confirmProposal(Long itemId, Long proposalId, Long userId) {
+        ProposalEntity proposal = proposalRepository.findById(proposalId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_PROPOSAL));
+        if (!proposal.getUser().getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_USER);
         }
         if (proposal.getStatus() != ProposalStatus.ACCEPTED) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "제안이 수락 상태가 아니면 확정할 수 없습니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, NOT_ACCEPTED_STATUS);
         }
         proposal.setStatus(ProposalStatus.CONFIRMED);
         proposalRepository.save(proposal);
-        itemService.updateItemStatus(itemId, ItemStatus.SOLD_OUT);
-        List<ProposalEntity> proposals = proposalRepository.findAllByItemIdAndStatus(itemId, ProposalStatus.PROPOSED);
-        for (ProposalEntity otherProposal : proposals) {
-            otherProposal.setStatus(ProposalStatus.REJECTED);
-            proposalRepository.save(otherProposal);
-        }
         return ProposalDto.fromEntity(proposal);
     }
 
     // 구매 제안 - 삭제
-    public void deleteProposal(Long proposalId, String writer, String password) {
-        UserEntity user = userRepository.findByUsername(writer)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
-        if (!user.getPassword().equals(password)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
+    public void deleteProposal(Long proposalId, Long userId) {
+        ProposalEntity proposal = proposalRepository.findById(proposalId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_PROPOSAL));
+        if (!proposal.getUser().getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_USER);
         }
-        ProposalEntity proposal = proposalRepository.findByIdAndUser(proposalId, user)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "제안을 찾을 수 없습니다."));
         proposalRepository.deleteById(proposalId);
     }
 }

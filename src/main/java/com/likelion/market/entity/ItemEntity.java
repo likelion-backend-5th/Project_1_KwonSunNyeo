@@ -1,5 +1,6 @@
 package com.likelion.market.entity;
 
+import com.likelion.market.dto.ItemDto;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,7 +15,7 @@ public class ItemEntity {
     private Long id;
     private String title;
     private String description;
-    private int minPriceWanted;
+    private Integer minPriceWanted;
     private String imageUrl;
 
     // 상품은 한 사용자에게 속할 수 있다.
@@ -34,4 +35,12 @@ public class ItemEntity {
     // 상품은 여러 댓글을 가질 수 있다.
     @OneToMany(mappedBy = "item")
     private List<CommentEntity> comments;
+
+    public void update(ItemDto dto) {
+        this.title = dto.getTitle();
+        this.description = dto.getDescription();
+        this.minPriceWanted = dto.getMinPriceWanted();
+        this.imageUrl = dto.getImageUrl();
+        this.status = dto.getStatus();
+    }
 }

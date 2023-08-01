@@ -1,6 +1,9 @@
 package com.likelion.market.dto;
 
 import com.likelion.market.entity.CommentEntity;
+import com.likelion.market.entity.ItemEntity;
+import com.likelion.market.entity.UserEntity;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
@@ -9,7 +12,10 @@ public class CommentDto {
     private Long itemId;
     private Long userId;
     private String password;
+
+    @NotBlank(message = "내용은 필수입니다.")
     private String content;
+
     private String reply;
 
     public static CommentDto fromEntity(CommentEntity entity) {
@@ -23,8 +29,10 @@ public class CommentDto {
         return dto;
     }
 
-    public CommentEntity newEntity() {
+    public CommentEntity newEntity(UserEntity user, ItemEntity item) {
         CommentEntity entity = new CommentEntity();
+        entity.setItem(item);
+        entity.setUser(user);
         entity.setPassword(password);
         entity.setContent(content);
         entity.setReply(reply);

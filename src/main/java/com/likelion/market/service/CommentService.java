@@ -26,15 +26,24 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
 
+    private static final String INVALID_USER = "유효하지 않은 사용자입니다.";
+    private static final String NOT_FOUND_ITEM = "해당 물품을 찾을 수 없습니다.";
+    private static final String NOT_FOUND_USER = "해당 사용자를 찾을 수 없습니다.";
+    private static final String NOT_FOUND_COMMENT = "해당 댓글을 찾을 수 없습니다.";
+    private static final String UNAUTHORIZED_USER = "댓글을 등록한 작성자의 정보가 일치하지 않습니다.";
+    private static final String UNAUTHORIZED_ITEM_OWNER = "물품을 등록한 작성자의 정보가 일치하지 않습니다.";
+
+
     // 물품 댓글 - 등록
     public CommentDto createComment(Long itemId, CommentDto dto) {
-        ItemEntity item = itemRepository.findById(itemId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        UserEntity user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        CommentEntity newComment = new CommentEntity();
-        newComment.setItem(item);
-        newComment.setUser(user);
-        newComment.setPassword(dto.getPassword());
-        newComment.setContent(dto.getContent());
+        if (dto.getUserId() == null || !userRepository.existsById(dto.getUserId())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_USER);
+        }
+        ItemEntity item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_ITEM));
+        UserEntity user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_USER));
+        CommentEntity newComment = dto.newEntity(user, item);
         commentRepository.save(newComment);
         return CommentDto.fromEntity(newComment);
     }
@@ -53,39 +62,28 @@ public class CommentService {
 
     // 물품 댓글 - 수정
     public CommentDto updateComment(Long itemId, Long commentId, CommentDto dto) {
-        Optional<CommentEntity> optionalComment = commentRepository.findById(commentId);
-        if (optionalComment.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        CommentEntity comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_COMMENT));
+        UserEntity user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_USER));
+        if (!comment.getUser().equals(user)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_USER);
         }
-        CommentEntity comment = optionalComment.get();
-        if (!itemId.equals(comment.getItem().getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-        if (!comment.getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "댓글을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
-        }
-        comment.setContent(dto.getContent());
-        comment.setUser(userRepository.findById(dto.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
+        comment.update(dto);
         commentRepository.save(comment);
         return CommentDto.fromEntity(comment);
     }
 
     // 물품 댓글 - 답변
     public CommentDto updateReply(Long itemId, Long commentId, CommentDto dto) {
-        Optional<ItemEntity> optionalItem = itemRepository.findById(itemId);
-        if (optionalItem.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        Optional<CommentEntity> optionalComment = commentRepository.findById(commentId);
-        if (optionalComment.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        CommentEntity comment = optionalComment.get();
-        if (!itemId.equals(comment.getItem().getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-        if (!optionalItem.get().getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "물품을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
+        CommentEntity comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_COMMENT));
+        UserEntity user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_USER));
+        ItemEntity item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_ITEM));
+        if (!item.getUser().equals(user)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_ITEM_OWNER);
         }
         comment.setReply(dto.getReply());
         commentRepository.save(comment);
@@ -93,21 +91,13 @@ public class CommentService {
     }
 
     // 물품 댓글 - 삭제
-    public void deleteComment(Long itemId, Long commentId, CommentDto dto) {
-        Optional<CommentEntity> optionalComment = commentRepository.findById(commentId);
-        if (optionalComment.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        CommentEntity comment = optionalComment.get();
-        if (!itemId.equals(comment.getItem().getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-        UserEntity user = userRepository.findById(dto.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public void deleteComment(Long itemId, Long commentId, Long userId) {
+        CommentEntity comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_COMMENT));
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, NOT_FOUND_USER));
         if (!comment.getUser().equals(user)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "댓글을 등록한 작성자가 일치하지 않습니다.");
-        }
-        if (!comment.getPassword().equals(dto.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "댓글을 등록한 작성자의 비밀번호가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, UNAUTHORIZED_USER);
         }
         commentRepository.deleteById(commentId);
     }

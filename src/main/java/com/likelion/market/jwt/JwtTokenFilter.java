@@ -1,6 +1,7 @@
 package com.likelion.market.jwt;
 
 import com.likelion.market.domain.CustomUserDetails;
+import com.likelion.market.entity.Role;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -16,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -47,19 +51,31 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 String username = jwtTokenUtils
                         .parseClaims(token)
                         .getSubject();
+                // JWT 에서 권한 가져오기
+                String roleString = jwtTokenUtils
+                        .parseClaims(token)
+                        .get("role", String.class);
+                Role role;
+                if (roleString != null) {
+                    role = Role.valueOf(roleString);
+                } else {
+                    role = Role.USER;
+                }
                 // 사용자 인증 정보 생성
+                List<GrantedAuthority> authorities = new ArrayList<>();
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
                 AbstractAuthenticationToken authenticationToken
                         = new UsernamePasswordAuthenticationToken(
                         CustomUserDetails.builder()
                                 .username(username)
+                                .role(role)
                                 .build(),
-                        token, new ArrayList<>()
+                        token, authorities
                 );
                 // SecurityContext 에 사용자 정보 설정
                 context.setAuthentication(authenticationToken);
                 // SecurityContextHolder 에 SecurityContext 설정
                 SecurityContextHolder.setContext(context);
-                log.info("set security context with jwt");
             }
             else {
                 log.warn("jwt validation failed");
