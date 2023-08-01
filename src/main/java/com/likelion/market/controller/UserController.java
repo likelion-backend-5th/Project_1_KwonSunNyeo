@@ -3,6 +3,7 @@ package com.likelion.market.controller;
 import com.likelion.market.domain.CustomUserDetails;
 import com.likelion.market.dto.ResponseDto;
 import com.likelion.market.dto.UserDto;
+import com.likelion.market.dto.UserProfileDto;
 import com.likelion.market.jwt.JwtRequestDto;
 import com.likelion.market.jwt.JwtTokenDto;
 import com.likelion.market.jwt.JwtTokenUtils;
@@ -26,6 +27,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("users")
 public class UserController {
+
+    // 회원가입 폼 반환
+    @GetMapping("/register")
+    public String registerForm() {
+        return "register-form";
+    }
+
     // 로그인 폼 반환
     @GetMapping("/login")
     public String loginForm() {
@@ -34,23 +42,18 @@ public class UserController {
 
     // 마이 프로필 페이지 반환
     @GetMapping("/my-profile")
-    public String myProfile(
+    public ResponseEntity<UserProfileDto> myProfile(
             Authentication authentication
     ) {
         // 현재 접속중인 아이디 출력
         CustomUserDetails userDetails
                 = (CustomUserDetails) authentication.getPrincipal();
-        log.info(userDetails.getUsername());
-        log.info(userDetails.getPhone());
-        log.info(userDetails.getEmail());
-        log.info(userDetails.getAddress());
-        return "my-profile";
-    }
-
-    // 회원가입 폼 반환
-    @GetMapping("/register")
-    public String registerForm() {
-        return "register-form";
+        UserProfileDto profile = new UserProfileDto();
+        profile.setUsername(userDetails.getUsername());
+        profile.setPhone(userDetails.getPhone());
+        profile.setEmail(userDetails.getEmail());
+        profile.setAddress(userDetails.getAddress());
+        return new ResponseEntity<>(profile, HttpStatus.OK);
     }
 
     private final UserDetailsManager manager;
