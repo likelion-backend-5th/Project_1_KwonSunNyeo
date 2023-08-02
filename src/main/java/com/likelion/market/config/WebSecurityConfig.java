@@ -15,6 +15,8 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 public class WebSecurityConfig {
     // JWT 필터 추가
@@ -29,6 +31,7 @@ public class WebSecurityConfig {
             HttpSecurity http
     ) throws Exception {
         http
+                .cors(withDefaults())  // CORS 설정 추가
                 .csrf(AbstractHttpConfigurer::disable)
                 // 인증 설정
                 .authorizeHttpRequests(auth -> auth
