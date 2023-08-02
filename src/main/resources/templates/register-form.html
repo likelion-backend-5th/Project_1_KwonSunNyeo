@@ -65,13 +65,8 @@
       data: JSON.stringify(user),
       dataType: 'json',
       success: function(data) {
-        // 회원가입 성공 시, 로그인 페이지로 리다이렉션
-        if (data.success) {
-          alert('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.');
-          window.location.href = '/users/login';
-        } else {
-          alert('회원가입에 실패했습니다. ' + data.message);
-        }
+        alert('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.');
+        window.location.href = '/users/login';
       },
       error: function() {
         alert('회원가입에 실패했습니다.');
