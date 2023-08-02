@@ -19,7 +19,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 public class WebSecurityConfig {
-    // JWT 필터 추가
     private final JwtTokenFilter jwtTokenFilter;
 
     public WebSecurityConfig(JwtTokenFilter jwtTokenFilter) {
@@ -33,7 +32,6 @@ public class WebSecurityConfig {
         http
                 .cors(withDefaults())  // CORS 설정 추가
                 .csrf(AbstractHttpConfigurer::disable)
-                // 인증 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/error", "/items/**", "/users/login", "/users/register")
                         .permitAll() // 모든 사용자 접근 가능
@@ -41,26 +39,11 @@ public class WebSecurityConfig {
                         .hasRole("ADMIN") // ADMIN 권한을 가진 사용자만 접근 가능
                         .requestMatchers("/user/**", "/users/my-profile")
                         .hasAnyRole("USER", "ADMIN") // USER, ADMIN 권한을 가진 사용자만 접근 가능
-                        // 나머지 요청에 대해 인증을 요구
-                        .anyRequest()
-                        .authenticated()
+                        .anyRequest().authenticated() // 그 외 요청은 인증 필요
                 )
-//                // 로그인 기능 설정
-//                .formLogin(formLogin -> formLogin
-//                        .loginPage("/users/login") // 로그인 페이지
-//                        .defaultSuccessUrl("/users/my-profile") // 로그인 성공 시
-//                        .failureUrl("/users/login?fail") // 로그인 실패 시
-//                        .permitAll() // 모든 사용자 접근 가능
-//                )
-//                // 로그아웃 기능 설정
-//                .logout(logout -> logout
-//                        .logoutUrl("/users/logout") // 로그아웃 페이지
-//                        .logoutSuccessUrl("/users/login") // 로그아웃 성공 시
-//                );
-                // JWT 인증 방식을 사용하기 위한 세션 설정
                 .sessionManagement(
                         sessionManagement -> sessionManagement
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // JWT 인증 방식을 사용하기 위한 세션 설정
                 )
                 .addFilterBefore(
                         jwtTokenFilter,
@@ -69,20 +52,8 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-    // 사용자 관리 (현재 사용하지 않음)
-//    @Bean
-    public UserDetailsManager userDetailsManager(
-            PasswordEncoder passwordEncoder
-    ) {
-        UserDetails user = User.withUsername("user")
-                .password(passwordEncoder.encode("password"))
-                .build();
-        return new InMemoryUserDetailsManager(user);
-    }
-
-    // 비밀번호 암호화
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(); // 비밀번호 암호화 방식 설정
     }
 }

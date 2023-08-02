@@ -11,7 +11,7 @@
 <main class="flex-shrink-0">
   <section class="py-5">
     <div class="container px-5">
-      <!-- login form-->
+      <!-- register form-->
       <div class="bg-light rounded-3 py-5 px-4 px-md-5 mb-5">
         <div class="row gx-5 justify-content-center">
           <div class="col-lg-8 col-xl-6">
@@ -34,16 +34,16 @@
             </form>
           </div>
         </div>
-
       </div>
     </div>
   </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
 <script>
+  // 회원가입을 위한 폼 제출 처리
   $('#register-form').on('submit', function(e) {
     e.preventDefault();
-
+    // 사용자 입력값 받기
     var password = $('#password').val();
     var passwordCheck = $('#password-check').val();
 
@@ -65,10 +65,15 @@
       data: JSON.stringify(user),
       dataType: 'json',
       success: function(data) {
-        alert('회원가입이 완료되었습니다!');
-        window.location.href = '/users/login';
+        // 회원가입 성공 시, 로그인 페이지로 리다이렉션
+        if (data.success) {
+          alert('회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.');
+          window.location.href = '/users/login';
+        } else {
+          alert('회원가입에 실패했습니다. ' + data.message);
+        }
       },
-      error: function(request, status, error) {
+      error: function() {
         alert('회원가입에 실패했습니다.');
       }
     });
