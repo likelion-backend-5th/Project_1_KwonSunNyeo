@@ -31,6 +31,7 @@ public class CustomUserDetails implements UserDetails {
     @Getter
     private Role role;
 
+    // 권한 설정
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -38,6 +39,7 @@ public class CustomUserDetails implements UserDetails {
         return authorities;
     }
 
+    // 계정정보 설정
     @Override
     public String getPassword() {
         return this.password;

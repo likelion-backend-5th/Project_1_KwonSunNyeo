@@ -8,12 +8,6 @@
   <script src="https://code.jquery.com/jquery-latest.min.js"></script>
 </head>
 <body>
-<!--  <h1>Sign In</h1>-->
-<!--  <form th:action="@{/users/sign-in}" method="post">-->
-<!--    <input type="text" name="username" placeholder="아이디">-->
-<!--    <input type="password" name="password" placeholder="비밀번호">-->
-<!--    <button type="submit">로그인</button>-->
-<!--  </form>-->
 <main class="flex-shrink-0">
   <section class="py-5">
     <div class="container px-5">
@@ -36,16 +30,16 @@
             </form>
           </div>
         </div>
-
       </div>
     </div>
   </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
 <script>
+  // 로그인을 위한 폼 제출 처리
   $('#login-form').on('submit', function(e) {
     e.preventDefault();
-
+    // 사용자 입력값 받기
     var user = {
       username: $('#identifier').val(),
       password: $('#password').val()
@@ -58,11 +52,8 @@
       data: JSON.stringify(user),
       dataType: 'json',
       success: function(data) {
-        console.log(data); // 서버에서 보내는 응답 전체 출력
-        var token = data.token;
-        console.log(token); // 토큰 값 출력
-        if (token) {
-          // 토큰이 존재하면 로컬 스토리지에 저장하고 my-profile 로 리다이렉션
+        // 로그인 성공 시, 토큰 저장 후 프로필 페이지로 리다이렉션
+        if (data.token) {
           localStorage.setItem('token', token);
           alert('로그인이 완료되었습니다!');
           window.location.href = '/users/my-profile';
@@ -70,10 +61,7 @@
           alert('로그인에 실패했습니다. 서버로부터 토큰을 받지 못했습니다.');
         }
       },
-      error: function(request, status, error) {
-        console.log(request);
-        console.log(status);
-        console.log(error);
+      error: function() {
         alert('로그인에 실패했습니다. ID 또는 비밀번호를 확인해주세요.');
       }
     });
